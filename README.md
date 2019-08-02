@@ -1,13 +1,19 @@
 # RNSentiance Example
 
-## Install npm dependencies
+This is a demo project using our [react-native-sentiance](https://github.com/sentiance/react-native-sentiance) bridge for react-native (>0.60).
+
+The native SDK documentation can be found [here](https://docs.sentiance.com/sdk/getting-started).\
+Requesting an app id & secret pair can be done [here](https://docs.sentiance.com/sdk/getting-started#requesting-an-app-id-and-secret).\
+The actual documentation of the bridge can be found [here](https://github.com/sentiance/react-native-sentiance/blob/master/README.md).
+
+## Example Project Setup
+
+### Install npm dependencies
 ```sh
 $ npm i
 ```
 
-## iOS setup
-
-### Install CocoaPods
+### Install CocoaPods (iOS)
 ```sh
 $ gem install bundler
 $ bundle install
@@ -18,10 +24,10 @@ $ bundle install
 $ cd ios && pod install
 ```
 
-### Open project in XCode
+## Run
+
+### Open `./ios/RNSentiance.xcworkspace` in XCode
 ```sh
 $ open ios/RNSentiance.xcworkspace
 ```
-
-## Android setup
-Open android folder in Android Studio and run
+### Open `./android` folder in Android Studio
