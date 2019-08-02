@@ -29,7 +29,4 @@ $ cd ios && pod install
 ## Run
 
 ### Open `./ios/RNSentiance.xcworkspace` in XCode
-```sh
-$ open ios/RNSentiance.xcworkspace
-```
 ### Open `./android` folder in Android Studio
