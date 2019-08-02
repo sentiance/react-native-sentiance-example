@@ -5,7 +5,6 @@
 $ npm i
 ```
 
-
 ## iOS setup
 
 ### Install CocoaPods
