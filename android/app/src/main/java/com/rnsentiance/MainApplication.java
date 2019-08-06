@@ -17,6 +17,11 @@ import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
 
+  // Read SENTIANCE_APP_ID and SENTIANCE_APP_SECRET from any safe source
+  private static final String SENTIANCE_APP_ID = "";
+  private static final String SENTIANCE_SECRET = "";
+  private static final String TAG = "TestApp";
+
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
     public boolean getUseDeveloperSupport() {
@@ -47,6 +52,13 @@ public class MainApplication extends Application implements ReactApplication {
   public void onCreate() {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
-    new RNSentianceHelper(this).initSDK(System.getenv("SENTIANCE_APP_ID"), System.getenv("SENTIANCE_APP_SECRET"), null, true, false, null, null);
+
+    RNSentianceHelper rnSentianceHelper = RNSentianceHelper.getInstance(getApplicationContext());
+        rnSentianceHelper.initializeSentianceSDK(
+                SENTIANCE_APP_ID,SENTIANCE_SECRET, // app id and secret
+                true, //auto start
+                null, // init callback
+                null // start callback
+        );
   }
 }
