@@ -61,17 +61,17 @@ export default class App extends Component < Props > {
     }
 
    async setupSdk() {
-        var shouldInitialize = await this.shouldInitialize();
+        const shouldInitialize = await this.shouldInitialize();
         if (shouldInitialize) {
             await RNSentiance.init(
-                'APP_ID',
+                "APP_ID",
                 "APP_SECRET",
                 null,
                 true,
             );
         }
 
-        var sdkInitialized = await this.isSdkInitiazed();
+        const sdkInitialized = await this.isSdkInitialized();
         if (sdkInitialized) {
             const sdkStatus = await RNSentiance.getSdkStatus();
             this.onSdkStatusUpdate(sdkStatus);
@@ -81,31 +81,30 @@ export default class App extends Component < Props > {
     }
 
     async onSdkStatusUpdate(sdkStatus) {
-      console.log("onSdkStatusUpdate");
       const data = await this.statusToData(sdkStatus);
       this.setState({
         data: data
       });
 
-      if (this.isSdkInitiazed()) {
+      if (this.isSdkInitialized()) {
         this.updateUserIdAndSdkVersion();
         this.listenToUserActivity();
       }
     }
 
     onUserActivityUpdate(userActivity) {
-        var {
+        const {
             type,
             tripInfo,
             stationaryInfo
         } = userActivity;
 
         if (type === "USER_ACTIVITY_TYPE_STATIONARY") {
-            var {
+            const {
                 location
             } = stationaryInfo;
             if (location) {
-                var {
+                const {
                     latitude,
                     longitude
                 } = location;
@@ -128,25 +127,22 @@ export default class App extends Component < Props > {
     }
 
     async updateUserIdAndSdkVersion() {
-        await RNSentiance.getUserId()
-            .then(userId => {
-                this.setState({
-                    userId: userId
-                });
-            })
-            .catch(err => console.log("There was an error:" + err));
-        this.setState({
-            sdkVersion: await RNSentiance.getVersion()
-        });
+        try {
+            const userId = await RNSentiance.getUserId();
+            this.setState({userId: userId});
+            this.setState({sdkVersion: await RNSentiance.getVersion()});
+        } catch (err) {
+
+        }
     }
 
-    async isSdkInitiazed() {
-        var initState = await RNSentiance.getInitState();
+    async isSdkInitialized() {
+        const initState = await RNSentiance.getInitState();
         return initState == "INITIALIZED";
     }
 
     async shouldInitialize() {
-        var initState = await RNSentiance.getInitState();
+        const initState = await RNSentiance.getInitState();
         return initState == "NOT_INITIALIZED";
     }
 
@@ -168,7 +164,7 @@ export default class App extends Component < Props > {
                 )
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 
-                var sdkInitialized = await this.isSdkInitiazed();
+                const sdkInitialized = await this.isSdkInitialized();
                 if (sdkInitialized) {
                     const sdkStatus = await RNSentiance.getSdkStatus();
                     this.onSdkStatusUpdate(sdkStatus);
@@ -178,8 +174,8 @@ export default class App extends Component < Props > {
     }
 
     async statusToData(sdkStatus) {
-      const isInitialized = await this.isSdkInitiazed();
-        var {
+      const isInitialized = await this.isSdkInitialized();
+        const {
             startStatus,
             isRemoteEnabled,
             isLocationPermGranted,
