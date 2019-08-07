@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import styles from "./styles";
 
-rnSentianceEmitter = new NativeEventEmitter(RNSentiance);
+const rnSentianceEmitter = new NativeEventEmitter(RNSentiance);
 
 export default class App extends Component {
   state = {
