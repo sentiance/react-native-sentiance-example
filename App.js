@@ -141,7 +141,7 @@ export default class App extends Component {
     const wifiQuota = await RNSentiance.getWiFiQuotaLimit();
     const wifiQuotaUsed = await RNSentiance.getWiFiQuotaUsage();
 
-    data = [
+    return [
       {
         key: "startStatus",
         value: startStatus
@@ -184,8 +184,6 @@ export default class App extends Component {
         value: `${diskQuotaStatus} (${diskQuotaUsed}/${diskQuota} )`
       }
     ];
-
-    return data;
   }
 
   render() {
