@@ -37,8 +37,14 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Some description</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Some description</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Some description</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Some description</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
@@ -58,13 +64,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-  <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-  <string>Some description</string>
-  <key>NSLocationAlwaysUsageDescription</key>
-  <string>Some description</string>
-  <key>NSLocationWhenInUseUsageDescription</key>
-  <string>Some description</string>
-  <key>NSMotionUsageDescription</key>
-  <string>Some description</string>
 </dict>
 </plist>

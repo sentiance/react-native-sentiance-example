@@ -81,9 +81,9 @@ PODS:
   - React-RCTWebSocket (0.60.4):
     - React-Core (= 0.60.4)
     - React-fishhook (= 0.60.4)
-  - RNSentiance (2.0.1):
+  - RNSentiance (4.0.2):
     - React
-  - SENTSDK (5.4.0)
+  - SENTSDK (5.6.1)
   - yoga (0.60.4.React)
 
 DEPENDENCIES:
@@ -113,7 +113,7 @@ DEPENDENCIES:
   - yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - boost-for-react-native
 
 EXTERNAL SOURCES:
@@ -189,10 +189,10 @@ SPEC CHECKSUMS:
   React-RCTText: e0f224898b13af9aa036ea7cb3d438daa68c1044
   React-RCTVibration: 0bea40cd51bd089bd591a8f74c86e91fdf2666c5
   React-RCTWebSocket: 163873f4cdd5f1058a9483443404fc3801581cb6
-  RNSentiance: 4c8beb592d991b77d4510c684cca2eee9ad81f7a
-  SENTSDK: 6704dc852f7cdc8a03baa4517009e1a62a90cbe5
+  RNSentiance: 04538abc8dc35b74d5ab77396bded66fcb43a532
+  SENTSDK: bb8ca3fac70734d8fa5c45781e042eb9dbedccea
   yoga: c2c050f6ae6e222534760cc82f559b89214b67e2
 
 PODFILE CHECKSUM: 063837b6d3ab972bf0bd8c227a3ce8a9a372fb61
 
-COCOAPODS: 1.7.5
+COCOAPODS: 1.9.1

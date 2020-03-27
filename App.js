@@ -60,6 +60,8 @@ export default class App extends Component {
       const data = await this.statusToData(sdkStatus);
       this.setState({ userId, sdkVersion, data });
       RNSentiance.listenUserActivityUpdates();
+    } else {
+      this.initializeSDK();
     }
   }
 
@@ -73,6 +75,7 @@ export default class App extends Component {
   onUserActivityUpdate(userActivity) {
     const { type, stationaryInfo } = userActivity;
     let userActivityText = "";
+    let stationaryLocation = "";
 
     if (type === "USER_ACTIVITY_TYPE_STATIONARY") {
       const { location } = stationaryInfo;
@@ -91,14 +94,26 @@ export default class App extends Component {
     });
   }
 
-  async isSdkInitialized() {
-    const initState = await RNSentiance.getInitState();
-    return initState == "INITIALIZED";
+  async initializeSDK() {
+    try {
+      const appId = "{{APP_ID}}";
+      const appSecret = "{{APP_SECRET}}";
+
+      await RNSentiance.reset();
+      await RNSentiance.init(appId, appSecret, null, true);
+
+      const userId = await RNSentiance.getUserId();
+      const sdkVersion = await RNSentiance.getVersion();
+
+      this.setState({userId, sdkVersion});
+    } catch (err) {
+      console.error(err);
+    }
   }
 
-  async shouldInitialize() {
+  async isSdkInitialized() {
     const initState = await RNSentiance.getInitState();
-    return initState == "NOT_INITIALIZED";
+    return initState === "INITIALIZED";
   }
 
   copyUserIdToBuffer = () => {
