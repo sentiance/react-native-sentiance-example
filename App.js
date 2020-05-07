@@ -34,21 +34,38 @@ export default class App extends Component {
 
   unSubscribe() {
     this.sdkStatusSubscription.remove();
-    this.sdkUserActivityUpdateSubscribtion.remove();
+    this.sdkUserActivityUpdateSubscription.remove();
+    this.sdkCrashEventSubscription.remove();
   }
 
-  subscribe() {
+  async subscribe() {
     this.sdkStatusSubscription = rnSentianceEmitter.addListener(
       "SDKStatusUpdate",
       sdkStatus => this.onSdkStatusUpdate(sdkStatus)
     );
 
-    this.sdkUserActivityUpdateSubscribtion = rnSentianceEmitter.addListener(
+    this.sdkUserActivityUpdateSubscription = rnSentianceEmitter.addListener(
       "SDKUserActivityUpdate",
       userActivity => {
         this.onUserActivityUpdate(userActivity);
       }
     );
+
+    const sdkInitialized = await this.isSdkInitialized();
+    if (sdkInitialized) {
+      this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
+        "SDKCrashEvent",
+        ({ time, lastKnownLocation }) => {
+          this.setState({
+            crash: {
+              time: new Date(time),
+              lastKnownLocation,
+            },
+          });
+        }
+      );
+      RNSentiance.listenCrashEvents();
+    }
   }
 
   async setupSdk() {
@@ -61,7 +78,7 @@ export default class App extends Component {
       this.setState({ userId, sdkVersion, data });
       RNSentiance.listenUserActivityUpdates();
     } else {
-      this.initializeSDK();
+      await this.initializeSDK();
     }
   }
 
@@ -105,7 +122,7 @@ export default class App extends Component {
       const userId = await RNSentiance.getUserId();
       const sdkVersion = await RNSentiance.getVersion();
 
-      this.setState({userId, sdkVersion});
+      this.setState({ userId, sdkVersion });
     } catch (err) {
       console.error(err);
     }
