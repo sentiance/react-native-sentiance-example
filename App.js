@@ -19,6 +19,7 @@ export default class App extends Component {
     userId: "...",
     sdkVersion: "...",
     userActivityText: "...",
+    userLinkInstallId: "...",
     data: []
   };
 
@@ -36,6 +37,7 @@ export default class App extends Component {
     this.sdkStatusSubscription.remove();
     this.sdkUserActivityUpdateSubscription.remove();
     this.sdkCrashEventSubscription.remove();
+    this.userLinkListener.remove();
   }
 
   async subscribe() {
@@ -51,21 +53,28 @@ export default class App extends Component {
       }
     );
 
-    const sdkInitialized = await this.isSdkInitialized();
-    if (sdkInitialized) {
-      this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
-        "SDKCrashEvent",
-        ({ time, lastKnownLocation }) => {
-          this.setState({
-            crash: {
-              time: new Date(time),
-              lastKnownLocation,
-            },
-          });
-        }
-      );
-      RNSentiance.listenCrashEvents();
-    }
+    this.userLinkListener = rnSentianceEmitter.addListener(
+      "SDKUserLink",
+      id => {
+        const { installId } = id;
+        this.setState({
+          userLinkInstallId: installId
+        });
+        RNSentiance.userLinkCallback(true);
+      }
+    );
+
+    this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
+      "SDKCrashEvent",
+      ({ time, lastKnownLocation }) => {
+        this.setState({
+          crash: {
+            time: new Date(time),
+            lastKnownLocation
+          }
+        });
+      }
+    );
   }
 
   async setupSdk() {
@@ -76,10 +85,12 @@ export default class App extends Component {
       const sdkVersion = await RNSentiance.getVersion();
       const data = await this.statusToData(sdkStatus);
       this.setState({ userId, sdkVersion, data });
-      RNSentiance.listenUserActivityUpdates();
     } else {
       await this.initializeSDK();
     }
+
+    RNSentiance.listenCrashEvents();
+    RNSentiance.listenUserActivityUpdates();
   }
 
   async onSdkStatusUpdate(sdkStatus) {
@@ -116,13 +127,17 @@ export default class App extends Component {
       const appId = "{{APP_ID}}";
       const appSecret = "{{APP_SECRET}}";
 
-      await RNSentiance.reset();
-      await RNSentiance.init(appId, appSecret, null, true);
+      await RNSentiance.initWithUserLinkingEnabled(
+        appId,
+        appSecret,
+        null,
+        true
+      );
 
-      const userId = await RNSentiance.getUserId();
+      // const userId = await RNSentiance.getUserId();
       const sdkVersion = await RNSentiance.getVersion();
 
-      this.setState({ userId, sdkVersion });
+      this.setState({ sdkVersion });
     } catch (err) {
       console.error(err);
     }
@@ -219,20 +234,28 @@ export default class App extends Component {
   }
 
   render() {
-    const { userId, sdkVersion, userActivityText, data } = this.state;
+    const {
+      userId,
+      sdkVersion,
+      userActivityText,
+      data,
+      userLinkInstallId
+    } = this.state;
 
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>RNSentiance</Text>
         <Text style={styles.heading}>User ID</Text>
         <Text style={styles.valueStyle}>{userId}</Text>
-        <Text style={styles.sdkVersion}>SDK version:{sdkVersion}</Text>
         <TouchableOpacity
-          onPress={e => this.copyUserIdToBuffer()}
+          onPress={() => this.copyUserIdToBuffer()}
           underlayColor="#fff"
         >
-          <Text style={styles.copyButton}>copy</Text>
+          <Text style={styles.copyButton}>Copy User ID</Text>
         </TouchableOpacity>
+        <Text style={styles.heading}>User Linking Install ID</Text>
+        <Text style={styles.valueStyle}>{userLinkInstallId}</Text>
+        <Text style={styles.sdkVersion}>SDK version: {sdkVersion}</Text>
         <Text style={styles.heading}>User Activity</Text>
         <Text style={styles.valueStyle}> {userActivityText} </Text>
         <Text style={styles.heading}>SDK Status</Text>
@@ -243,6 +266,14 @@ export default class App extends Component {
             </Text>
           ))}
         </ScrollView>
+        <TouchableOpacity
+          onPress={async () => {
+            await RNSentiance.reset();
+          }}
+          underlayColor="#fff"
+        >
+          <Text style={styles.copyButton}>SDK Reset</Text>
+        </TouchableOpacity>
       </View>
     );
   }
