@@ -24,8 +24,9 @@ export default class App extends Component {
   };
 
   componentDidMount() {
+    this.subscribeBeforeSDKSetup();
     this.setupSdk();
-    this.subscribe();
+    this.subscribeAfterSDKSetup();
     this.requestPermissionAndroid();
   }
 
@@ -36,11 +37,24 @@ export default class App extends Component {
   unSubscribe() {
     this.sdkStatusSubscription.remove();
     this.sdkUserActivityUpdateSubscription.remove();
-    this.sdkCrashEventSubscription.remove();
     this.userLinkListener.remove();
+    this.sdkCrashEventSubscription.remove();
   }
 
-  async subscribe() {
+  async subscribeBeforeSDKSetup() {
+    this.userLinkListener = rnSentianceEmitter.addListener(
+      "SDKUserLink",
+      id => {
+        const { installId } = id;
+        setTimeout(() => {
+          RNSentiance.userLinkCallback(true);
+          this.setState({ userLinkInstallId: installId });
+        }, 10000);
+      }
+    );
+  }
+
+  async subscribeAfterSDKSetup() {
     this.sdkStatusSubscription = rnSentianceEmitter.addListener(
       "SDKStatusUpdate",
       sdkStatus => this.onSdkStatusUpdate(sdkStatus)
@@ -50,15 +64,6 @@ export default class App extends Component {
       "SDKUserActivityUpdate",
       userActivity => {
         this.onUserActivityUpdate(userActivity);
-      }
-    );
-
-    this.userLinkListener = rnSentianceEmitter.addListener(
-      "SDKUserLink",
-      id => {
-        const { installId } = id;
-        this.setState({ userLinkInstallId: installId });
-        RNSentiance.userLinkCallback(true);
       }
     );
 

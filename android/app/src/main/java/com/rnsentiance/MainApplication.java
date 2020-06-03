@@ -53,12 +53,12 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
 
-    RNSentianceHelper rnSentianceHelper = RNSentianceHelper.getInstance(getApplicationContext());
-        rnSentianceHelper.initializeSentianceSDK(
-                SENTIANCE_APP_ID,SENTIANCE_SECRET, // app id and secret
-                true, //auto start
-                null, // init callback
-                null // start callback
-        );
+//    RNSentianceHelper rnSentianceHelper = RNSentianceHelper.getInstance(getApplicationContext());
+//    rnSentianceHelper.initializeSentianceSDK(
+//            SENTIANCE_APP_ID,SENTIANCE_SECRET, // app id and secret
+//            true, //auto start
+//            null, // init callback
+//            null // start callback
+//    );
   }
 }
