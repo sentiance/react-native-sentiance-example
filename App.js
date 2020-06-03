@@ -113,8 +113,8 @@ export default class App extends Component {
 
   async initializeSDK() {
     try {
-      const appId = "";
-      const appSecret = "";
+      const appId = "{{APP_ID}}";
+      const appSecret = "{{APP_SECRET}}";
 
       await RNSentiance.initWithUserLinkingEnabled(
         appId,
