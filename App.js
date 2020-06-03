@@ -57,9 +57,7 @@ export default class App extends Component {
       "SDKUserLink",
       id => {
         const { installId } = id;
-        this.setState({
-          userLinkInstallId: installId
-        });
+        this.setState({ userLinkInstallId: installId });
         RNSentiance.userLinkCallback(true);
       }
     );
@@ -67,12 +65,7 @@ export default class App extends Component {
     this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
       "SDKCrashEvent",
       ({ time, lastKnownLocation }) => {
-        this.setState({
-          crash: {
-            time: new Date(time),
-            lastKnownLocation
-          }
-        });
+        this.setState({ crash: { time: new Date(time), lastKnownLocation } });
       }
     );
   }
@@ -80,9 +73,9 @@ export default class App extends Component {
   async setupSdk() {
     const sdkInitialized = await this.isSdkInitialized();
     if (sdkInitialized) {
-      const sdkStatus = await RNSentiance.getSdkStatus();
       const userId = await RNSentiance.getUserId();
       const sdkVersion = await RNSentiance.getVersion();
+      const sdkStatus = await RNSentiance.getSdkStatus();
       const data = await this.statusToData(sdkStatus);
       this.setState({ userId, sdkVersion, data });
     } else {
@@ -95,9 +88,7 @@ export default class App extends Component {
 
   async onSdkStatusUpdate(sdkStatus) {
     const data = await this.statusToData(sdkStatus);
-    this.setState({
-      data: data
-    });
+    this.setState({ data: data });
   }
 
   onUserActivityUpdate(userActivity) {
@@ -117,15 +108,13 @@ export default class App extends Component {
     } else if (type === "USER_ACTIVITY_TYPE_UNKNOWN") {
       userActivityText = "Unknown";
     }
-    this.setState({
-      userActivityText
-    });
+    this.setState({ userActivityText });
   }
 
   async initializeSDK() {
     try {
-      const appId = "{{APP_ID}}";
-      const appSecret = "{{APP_SECRET}}";
+      const appId = "";
+      const appSecret = "";
 
       await RNSentiance.initWithUserLinkingEnabled(
         appId,
@@ -134,10 +123,11 @@ export default class App extends Component {
         true
       );
 
-      // const userId = await RNSentiance.getUserId();
+      const userId = await RNSentiance.getUserId();
       const sdkVersion = await RNSentiance.getVersion();
-
-      this.setState({ sdkVersion });
+      const sdkStatus = await RNSentiance.getSdkStatus();
+      const data = await this.statusToData(sdkStatus);
+      this.setState({ userId, sdkVersion, data });
     } catch (err) {
       console.error(err);
     }
