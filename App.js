@@ -23,11 +23,15 @@ export default class App extends Component {
     data: []
   };
 
-  componentDidMount() {
-    this.subscribeBeforeSDKSetup();
-    this.setupSdk();
-    this.subscribeAfterSDKSetup();
-    this.requestPermissionAndroid();
+  async componentDidMount() {
+    try {
+      this.subscribeBeforeSDKSetup();
+      await this.setupSdk();
+      this.subscribeAfterSDKSetup();
+      await this.requestPermissionAndroid();
+    } catch (e) {
+      console.error(e.code, e);
+    }
   }
 
   componentWillUnmount() {
@@ -41,20 +45,23 @@ export default class App extends Component {
     this.sdkCrashEventSubscription.remove();
   }
 
-  async subscribeBeforeSDKSetup() {
+  subscribeBeforeSDKSetup() {
     this.userLinkListener = rnSentianceEmitter.addListener(
       "SDKUserLink",
       id => {
+        /**
+         * Implement the actual user linking logic here.
+         * If it is successful, call RNSentiance.userLinkCallback(true);
+         * Otherwise, RNSentiance.userLinkCallback(false);
+         */
         const { installId } = id;
-        setTimeout(() => {
-          RNSentiance.userLinkCallback(true);
-          this.setState({ userLinkInstallId: installId });
-        }, 10000);
+        this.setState({ userLinkInstallId: installId });
+        RNSentiance.userLinkCallback(true);
       }
     );
   }
 
-  async subscribeAfterSDKSetup() {
+  subscribeAfterSDKSetup() {
     this.sdkStatusSubscription = rnSentianceEmitter.addListener(
       "SDKStatusUpdate",
       sdkStatus => this.onSdkStatusUpdate(sdkStatus)
@@ -77,17 +84,25 @@ export default class App extends Component {
 
   async setupSdk() {
     const sdkInitialized = await this.isSdkInitialized();
-    if (sdkInitialized) {
-      const userId = await RNSentiance.getUserId();
-      const sdkVersion = await RNSentiance.getVersion();
-      const sdkStatus = await RNSentiance.getSdkStatus();
-      const data = await this.statusToData(sdkStatus);
-      this.setState({ userId, sdkVersion, data });
-    } else {
-      await this.initializeSDK();
+    if (!sdkInitialized) {
+      const appId = "{{APP_ID}}";
+      const appSecret = "{{APP_SECRET}}";
+
+      await RNSentiance.initWithUserLinkingEnabled(
+        appId,
+        appSecret,
+        null,
+        true
+      );
     }
 
-    RNSentiance.listenCrashEvents();
+    const userId = await RNSentiance.getUserId();
+    const sdkVersion = await RNSentiance.getVersion();
+    const sdkStatus = await RNSentiance.getSdkStatus();
+    const data = await this.statusToData(sdkStatus);
+    this.setState({ userId, sdkVersion, data });
+
+    await RNSentiance.listenCrashEvents();
     RNSentiance.listenUserActivityUpdates();
   }
 
@@ -116,28 +131,6 @@ export default class App extends Component {
     this.setState({ userActivityText });
   }
 
-  async initializeSDK() {
-    try {
-      const appId = "{{APP_ID}}";
-      const appSecret = "{{APP_SECRET}}";
-
-      await RNSentiance.initWithUserLinkingEnabled(
-        appId,
-        appSecret,
-        null,
-        true
-      );
-
-      const userId = await RNSentiance.getUserId();
-      const sdkVersion = await RNSentiance.getVersion();
-      const sdkStatus = await RNSentiance.getSdkStatus();
-      const data = await this.statusToData(sdkStatus);
-      this.setState({ userId, sdkVersion, data });
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   async isSdkInitialized() {
     const initState = await RNSentiance.getInitState();
     return initState === "INITIALIZED";
@@ -156,7 +149,7 @@ export default class App extends Component {
         const sdkInitialized = await this.isSdkInitialized();
         if (sdkInitialized) {
           const sdkStatus = await RNSentiance.getSdkStatus();
-          this.onSdkStatusUpdate(sdkStatus);
+          await this.onSdkStatusUpdate(sdkStatus);
         }
       }
     }
