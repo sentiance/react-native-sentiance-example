@@ -83,8 +83,8 @@ export default class App extends Component {
   }
 
   async setupSdk() {
-    const sdkInitialized = await this.isSdkInitialized();
-    if (!sdkInitialized) {
+    const sdkNotInitialized = await this.isSdkNotInitialized();
+    if (sdkNotInitialized) {
       const appId = "{{APP_ID}}";
       const appSecret = "{{APP_SECRET}}";
 
@@ -131,9 +131,9 @@ export default class App extends Component {
     this.setState({ userActivityText });
   }
 
-  async isSdkInitialized() {
+  async isSdkNotInitialized() {
     const initState = await RNSentiance.getInitState();
-    return initState === "INITIALIZED";
+    return initState === "NOT_INITIALIZED";
   }
 
   copyUserIdToBuffer = () => {
@@ -146,8 +146,8 @@ export default class App extends Component {
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        const sdkInitialized = await this.isSdkInitialized();
-        if (sdkInitialized) {
+        const sdkNotInitialized = await this.isSdkNotInitialized();
+        if (!sdkNotInitialized) {
           const sdkStatus = await RNSentiance.getSdkStatus();
           await this.onSdkStatusUpdate(sdkStatus);
         }
