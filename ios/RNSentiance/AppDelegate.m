@@ -18,15 +18,17 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
-  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
-                                                   moduleName:@"RNSentiance"
-                                            initialProperties:nil];
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"RNSentiance" initialProperties:nil];
 
   // Read SENTIANCE_APP_ID and SENTIANCE_APP_SECRET from any safe source
-  NSString * SENTIANCE_APP_ID = @"";
-  NSString * SENTIANCE_APP_SECRET = @"";
+  NSString *SENTIANCE_APP_ID = @"";
+  NSString *SENTIANCE_APP_SECRET = @"";
+  NSString *value = [[bridge moduleForName:@"RNSentiance"] getValueForKey:@"SDK_USER_LINKED" value:nil];
 
-  [[bridge moduleForName:@"RNSentiance"] initSDK:SENTIANCE_APP_ID secret:SENTIANCE_APP_SECRET baseURL:nil shouldStart:YES resolver:nil rejecter:nil];
+  if (value != nil && [value isEqualToString:@"true"]) {
+    [[bridge moduleForName:@"RNSentiance"] initSDK:SENTIANCE_APP_ID secret:SENTIANCE_APP_SECRET baseURL:nil shouldStart:YES resolver:nil rejecter:nil];
+    NSLog(@"Initializing natively");
+  }
 
   rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
 

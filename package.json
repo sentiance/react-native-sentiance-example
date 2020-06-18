@@ -10,7 +10,7 @@
   "dependencies": {
     "react": "16.8.6",
     "react-native": "^0.62.2",
-    "react-native-sentiance": "3.4.0"
+    "react-native-sentiance": "4.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.5.5",

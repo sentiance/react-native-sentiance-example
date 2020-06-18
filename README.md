@@ -1,12 +1,11 @@
 # RNSentiance Example
 
-This is a basic example project using our [react-native-sentiance](https://github.com/sentiance/react-native-sentiance) bridge for react-native (>0.60).
+This is an example project using our [react-native-sentiance](https://github.com/sentiance/react-native-sentiance) bridge for react-native (>0.60).
 
-Below are the examples of other features in separated branches:
+Below are the examples of other features in separated branches:	
 
-1. [User Linking](https://github.com/sentiance/react-native-sentiance-example/tree/user-linking)
-2. [Crash Detection](https://github.com/sentiance/react-native-sentiance-example/tree/crash-detection)
-3. [On-device Trip Profiling](https://github.com/sentiance/react-native-sentiance-example/tree/on-device-trip-profiling)
+1. [Crash Detection](https://github.com/sentiance/react-native-sentiance-example/tree/crash-detection)
+2. [On-device Trip Profiling](https://github.com/sentiance/react-native-sentiance-example/tree/on-device-trip-profiling)
 
 ## Docs
 
