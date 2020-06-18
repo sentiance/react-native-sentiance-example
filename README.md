@@ -2,6 +2,8 @@
 
 This is a demo project using our [react-native-sentiance](https://github.com/sentiance/react-native-sentiance) bridge for react-native (>0.60).
 
+For the demo implementation of user-linking feature, please refer to the [user-linking](https://github.com/sentiance/react-native-sentiance-example/tree/user-linking) branch.
+
 ## Docs
 
 * The native SDK documentation can be found [here](https://docs.sentiance.com/sdk/getting-started).
