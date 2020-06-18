@@ -25,7 +25,7 @@
   // Read SENTIANCE_APP_ID and SENTIANCE_APP_SECRET from any safe source
   NSString * SENTIANCE_APP_ID = @"";
   NSString * SENTIANCE_APP_SECRET = @"";
-  
+
   [[bridge moduleForName:@"RNSentiance"] initSDK:SENTIANCE_APP_ID secret:SENTIANCE_APP_SECRET baseURL:nil shouldStart:YES resolver:nil rejecter:nil];
 
   rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
