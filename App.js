@@ -19,7 +19,8 @@ export default class App extends Component {
     userId: "...",
     sdkVersion: "...",
     userActivityText: "...",
-    data: []
+    data: [],
+    subscriptionsAdded: false
   };
 
   async componentDidMount() {
@@ -33,7 +34,9 @@ export default class App extends Component {
   }
 
   componentWillUnmount() {
-    this.unSubscribe();
+    if (this.state.subscriptionsAdded) {
+      this.unSubscribe();
+    }
   }
 
   unSubscribe() {
@@ -61,6 +64,7 @@ export default class App extends Component {
         this.setState({ crash: { time: new Date(time), lastKnownLocation } });
       }
     );
+    this.setState({ subscriptionsAdded: true });
   }
 
   async setupSdk() {
@@ -107,6 +111,11 @@ export default class App extends Component {
     this.setState({ userActivityText });
   }
 
+  async isSdkInitialized() {
+    const initState = await RNSentiance.getInitState();
+    return initState === "INITIALIZED";
+  }
+
   async isSdkNotInitialized() {
     const initState = await RNSentiance.getInitState();
     return initState === "NOT_INITIALIZED";
@@ -122,8 +131,8 @@ export default class App extends Component {
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        const sdkNotInitialized = await this.isSdkNotInitialized();
-        if (!sdkNotInitialized) {
+        const sdkInitialized = await this.isSdkInitialized();
+        if (sdkInitialized) {
           const sdkStatus = await RNSentiance.getSdkStatus();
           await this.onSdkStatusUpdate(sdkStatus);
         }
