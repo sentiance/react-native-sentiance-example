@@ -19,17 +19,24 @@ export default class App extends Component {
     userId: "...",
     sdkVersion: "...",
     userActivityText: "...",
-    data: []
+    data: [],
+    subscriptionsAdded: false
   };
 
-  componentDidMount() {
-    this.setupSdk();
-    this.subscribe();
-    this.requestPermissionAndroid();
+  async componentDidMount() {
+    try {
+      await this.setupSdk();
+      this.subscribeAfterSDKSetup();
+      await this.requestPermissionAndroid();
+    } catch (e) {
+      console.error(e.code, e);
+    }
   }
 
   componentWillUnmount() {
-    this.unSubscribe();
+    if (this.state.subscriptionsAdded) {
+      this.unSubscribe();
+    }
   }
 
   unSubscribe() {
@@ -38,7 +45,7 @@ export default class App extends Component {
     this.sdkCrashEventSubscription.remove();
   }
 
-  async subscribe() {
+  subscribeAfterSDKSetup() {
     this.sdkStatusSubscription = rnSentianceEmitter.addListener(
       "SDKStatusUpdate",
       sdkStatus => this.onSdkStatusUpdate(sdkStatus)
@@ -51,42 +58,37 @@ export default class App extends Component {
       }
     );
 
-    const sdkInitialized = await this.isSdkInitialized();
-    if (sdkInitialized) {
-      this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
-        "SDKCrashEvent",
-        ({ time, lastKnownLocation }) => {
-          this.setState({
-            crash: {
-              time: new Date(time),
-              lastKnownLocation,
-            },
-          });
-        }
-      );
-      RNSentiance.listenCrashEvents();
-    }
+    this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
+      "SDKCrashEvent",
+      ({ time, lastKnownLocation }) => {
+        this.setState({ crash: { time: new Date(time), lastKnownLocation } });
+      }
+    );
+    this.setState({ subscriptionsAdded: true });
   }
 
   async setupSdk() {
-    const sdkInitialized = await this.isSdkInitialized();
-    if (sdkInitialized) {
-      const sdkStatus = await RNSentiance.getSdkStatus();
-      const userId = await RNSentiance.getUserId();
-      const sdkVersion = await RNSentiance.getVersion();
-      const data = await this.statusToData(sdkStatus);
-      this.setState({ userId, sdkVersion, data });
-      RNSentiance.listenUserActivityUpdates();
-    } else {
-      await this.initializeSDK();
+    const sdkNotInitialized = await this.isSdkNotInitialized();
+    if (sdkNotInitialized) {
+      const appId = "{{APP_ID}}";
+      const appSecret = "{{APP_SECRET}}";
+
+      await RNSentiance.init(appId, appSecret, null, true);
     }
+
+    const userId = await RNSentiance.getUserId();
+    const sdkVersion = await RNSentiance.getVersion();
+    const sdkStatus = await RNSentiance.getSdkStatus();
+    const data = await this.statusToData(sdkStatus);
+    this.setState({ userId, sdkVersion, data });
+
+    await RNSentiance.listenCrashEvents();
+    RNSentiance.listenUserActivityUpdates();
   }
 
   async onSdkStatusUpdate(sdkStatus) {
     const data = await this.statusToData(sdkStatus);
-    this.setState({
-      data: data
-    });
+    this.setState({ data: data });
   }
 
   onUserActivityUpdate(userActivity) {
@@ -106,31 +108,17 @@ export default class App extends Component {
     } else if (type === "USER_ACTIVITY_TYPE_UNKNOWN") {
       userActivityText = "Unknown";
     }
-    this.setState({
-      userActivityText
-    });
-  }
-
-  async initializeSDK() {
-    try {
-      const appId = "{{APP_ID}}";
-      const appSecret = "{{APP_SECRET}}";
-
-      await RNSentiance.reset();
-      await RNSentiance.init(appId, appSecret, null, true);
-
-      const userId = await RNSentiance.getUserId();
-      const sdkVersion = await RNSentiance.getVersion();
-
-      this.setState({ userId, sdkVersion });
-    } catch (err) {
-      console.error(err);
-    }
+    this.setState({ userActivityText });
   }
 
   async isSdkInitialized() {
     const initState = await RNSentiance.getInitState();
     return initState === "INITIALIZED";
+  }
+
+  async isSdkNotInitialized() {
+    const initState = await RNSentiance.getInitState();
+    return initState === "NOT_INITIALIZED";
   }
 
   copyUserIdToBuffer = () => {
@@ -146,7 +134,7 @@ export default class App extends Component {
         const sdkInitialized = await this.isSdkInitialized();
         if (sdkInitialized) {
           const sdkStatus = await RNSentiance.getSdkStatus();
-          this.onSdkStatusUpdate(sdkStatus);
+          await this.onSdkStatusUpdate(sdkStatus);
         }
       }
     }
@@ -226,13 +214,13 @@ export default class App extends Component {
         <Text style={styles.welcome}>RNSentiance</Text>
         <Text style={styles.heading}>User ID</Text>
         <Text style={styles.valueStyle}>{userId}</Text>
-        <Text style={styles.sdkVersion}>SDK version:{sdkVersion}</Text>
         <TouchableOpacity
-          onPress={e => this.copyUserIdToBuffer()}
+          onPress={() => this.copyUserIdToBuffer()}
           underlayColor="#fff"
         >
-          <Text style={styles.copyButton}>copy</Text>
+          <Text style={styles.copyButton}>Copy User ID</Text>
         </TouchableOpacity>
+        <Text style={styles.sdkVersion}>SDK version: {sdkVersion}</Text>
         <Text style={styles.heading}>User Activity</Text>
         <Text style={styles.valueStyle}> {userActivityText} </Text>
         <Text style={styles.heading}>SDK Status</Text>
@@ -243,6 +231,14 @@ export default class App extends Component {
             </Text>
           ))}
         </ScrollView>
+        <TouchableOpacity
+          onPress={async () => {
+            await RNSentiance.reset();
+          }}
+          underlayColor="#fff"
+        >
+          <Text style={styles.copyButton}>SDK Reset</Text>
+        </TouchableOpacity>
       </View>
     );
   }
