@@ -151,7 +151,13 @@ export default class App extends Component {
       isGooglePlayServicesMissing,
       wifiQuotaStatus,
       mobileQuotaStatus,
-      diskQuotaStatus
+      diskQuotaStatus,
+      isActivityRecognitionPermGranted,
+      isAirplaneModeEnabled,
+      isLocationAvailable,
+      isBatteryOptimizationEnabled,
+      isBatterySavingEnabled,
+      isBackgroundProcessingRestricted
     } = sdkStatus;
 
     const diskQuota = await RNSentiance.getDiskQuotaLimit();
@@ -202,6 +208,30 @@ export default class App extends Component {
       {
         key: "diskQuotaStatus",
         value: `${diskQuotaStatus} (${diskQuotaUsed}/${diskQuota} )`
+      },
+      {
+        key: "isActivityRecognitionPermGranted",
+        value: isActivityRecognitionPermGranted ? "YES" : "NO"
+      },
+      {
+        key: "isAirplaneModeEnabled",
+        value: isAirplaneModeEnabled ? "YES" : "NO"
+      },
+      {
+        key: "isLocationAvailable",
+        value: isLocationAvailable ? "YES" : "NO"
+      },
+      {
+        key: "isBatteryOptimizationEnabled",
+        value: isBatteryOptimizationEnabled ? "YES" : "NO"
+      },
+      {
+        key: "isBatterySavingEnabled",
+        value: isBatterySavingEnabled ? "YES" : "NO"
+      },
+      {
+        key: "isBackgroundProcessingRestricted",
+        value: isBackgroundProcessingRestricted ? "YES" : "NO"
       }
     ];
   }
