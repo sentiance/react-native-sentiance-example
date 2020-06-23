@@ -3,7 +3,6 @@ import React, { Component } from "react";
 import {
   Platform,
   Text,
-  View,
   ScrollView,
   TouchableOpacity,
   Clipboard,
@@ -210,7 +209,7 @@ export default class App extends Component {
     const { userId, sdkVersion, userActivityText, data } = this.state;
 
     return (
-      <View style={styles.container}>
+      <ScrollView style={{backgroundColor: 'black'}} contentContainerStyle={styles.container}>
         <Text style={styles.welcome}>RNSentiance</Text>
         <Text style={styles.heading}>User ID</Text>
         <Text style={styles.valueStyle}>{userId}</Text>
@@ -224,13 +223,11 @@ export default class App extends Component {
         <Text style={styles.heading}>User Activity</Text>
         <Text style={styles.valueStyle}> {userActivityText} </Text>
         <Text style={styles.heading}>SDK Status</Text>
-        <ScrollView contentContainerStyle={styles.sdkStatusList}>
-          {data.map(item => (
-            <Text key={`item-${item.key}`} style={styles.valueStyle}>
-              {item.key}: {item.value}
-            </Text>
-          ))}
-        </ScrollView>
+        {data.map(item => (
+          <Text key={`item-${item.key}`} style={styles.valueStyle}>
+            {item.key}: {item.value}
+          </Text>
+        ))}
         <TouchableOpacity
           onPress={async () => {
             await RNSentiance.reset();
@@ -239,7 +236,7 @@ export default class App extends Component {
         >
           <Text style={styles.copyButton}>SDK Reset</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     );
   }
 }

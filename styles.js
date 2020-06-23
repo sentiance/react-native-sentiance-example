@@ -2,13 +2,10 @@ import { StyleSheet, Dimensions } from "react-native";
 
 export default StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: "flex-start",
     backgroundColor: "black",
     padding: 24
-  },
-  sdkStatusList: {
-    flex: 1
   },
   welcome: {
     marginTop: 64,
@@ -40,7 +37,7 @@ export default StyleSheet.create({
   sdkVersion: {
     width: Dimensions.get("window").width,
     position: "absolute",
-    bottom: 48,
+    bottom: 32,
     color: "gray",
     textAlign: "center"
   }
