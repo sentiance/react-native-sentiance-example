@@ -17,10 +17,12 @@ const ACTIVITY_RECOGNITION = 'android.permission.ACTIVITY_RECOGNITION';
 
 export default class App extends Component {
   state = {
-    userId: '...',
-    sdkVersion: '...',
-    userActivityText: '...',
-    userLinkInstallId: '...',
+    userId: "...",
+    sdkVersion: "...",
+    userActivityText: "...",
+    userLinkInstallId: "...",
+    tripProfile: "...",
+    fullProfilingEnabled: true,
     data: [],
   };
 
@@ -42,6 +44,7 @@ export default class App extends Component {
     this.sdkStatusSubscription.remove();
     this.sdkUserActivityUpdateSubscription.remove();
     this.userLinkListener.remove();
+    this.sdkTripProfilesSubscription.remove();
   }
 
   /**
@@ -75,6 +78,14 @@ export default class App extends Component {
       'SDKUserActivityUpdate',
       userActivity => this.onUserActivityUpdate(userActivity)
     );
+    this.sdkTripProfilesSubscription = rnSentianceEmitter.addListener(
+      "SDKTripProfile",
+      (tripProfile) => {
+        this.setState({
+          tripProfile: JSON.stringify(tripProfile, null, 2)
+        });
+      }
+    );
   }
 
   async initSDK() {
@@ -104,6 +115,7 @@ export default class App extends Component {
         this.onUserActivityUpdate(await RNSentiance.getUserActivity());
         this.setState({ userId, sdkVersion, data });
         await RNSentiance.listenUserActivityUpdates();
+        RNSentiance.listenTripProfiles();
 
         clearInterval(this.interval);
       }
@@ -292,6 +304,16 @@ export default class App extends Component {
     ];
   }
 
+  toggleTripProfiling = async () => {
+    const { fullProfilingEnabled } = this.state
+    try {
+      await RNSentiance.updateTripProfileConfig({ enableFullProfiling: !fullProfilingEnabled, speedLimit: 20.5 })
+      this.setState({ fullProfilingEnabled: !fullProfilingEnabled })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   render() {
     const {
       userId,
@@ -299,6 +321,8 @@ export default class App extends Component {
       userActivityText,
       data,
       userLinkInstallId,
+      tripProfile,
+      fullProfilingEnabled
     } = this.state;
 
     return (
@@ -317,6 +341,14 @@ export default class App extends Component {
         <Text style={styles.sdkVersion}>SDK version: {sdkVersion}</Text>
         <Text style={styles.heading}>User Activity</Text>
         <Text style={styles.valueStyle}> {userActivityText} </Text>
+        <Text style={styles.heading}>Trip Profile</Text>
+        <Text style={styles.valueStyle}>{tripProfile}</Text>
+        <TouchableOpacity
+          onPress={() => this.toggleTripProfiling()}
+          underlayColor="#fff"
+        >
+          <Text style={styles.copyButton}>{ fullProfilingEnabled? 'Switch to on-device trip profiling' : 'Switch to full profiling' }</Text>
+        </TouchableOpacity>
         <Text style={styles.heading}>SDK Status</Text>
         {data.map(item => (
           <Text key={`item-${item.key}`} style={styles.valueStyle}>
