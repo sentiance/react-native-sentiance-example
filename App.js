@@ -18,7 +18,6 @@ export default class App extends Component {
     userId: "...",
     sdkVersion: "...",
     userActivityText: "...",
-    crashEvent: "...",
     data: [],
     subscriptionsAdded: false
   };
@@ -42,7 +41,6 @@ export default class App extends Component {
   unSubscribe() {
     this.sdkStatusSubscription.remove();
     this.sdkUserActivityUpdateSubscription.remove();
-    this.sdkCrashEventSubscription.remove();
   }
 
   subscribeAfterSDKSetup() {
@@ -58,14 +56,6 @@ export default class App extends Component {
       }
     );
 
-    this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
-      "SDKCrashEvent",
-      ({ time, lastKnownLocation }) => {
-        this.setState({
-          crashEvent: JSON.stringify({time: new Date(time), lastKnownLocation}, null, 3)
-        });
-      }
-    );
     this.setState({ subscriptionsAdded: true });
   }
 
@@ -84,7 +74,6 @@ export default class App extends Component {
     const data = await this.statusToData(sdkStatus);
     this.setState({ userId, sdkVersion, data });
 
-    await RNSentiance.listenCrashEvents();
     RNSentiance.listenUserActivityUpdates();
   }
 
@@ -209,7 +198,7 @@ export default class App extends Component {
   }
 
   render() {
-    const { userId, sdkVersion, userActivityText, data, crashEvent } = this.state;
+    const { userId, sdkVersion, userActivityText, data } = this.state;
 
     return (
       <ScrollView style={{backgroundColor: 'black'}} contentContainerStyle={styles.container}>
@@ -225,8 +214,6 @@ export default class App extends Component {
         <Text style={styles.sdkVersion}>SDK version: {sdkVersion}</Text>
         <Text style={styles.heading}>User Activity</Text>
         <Text style={styles.valueStyle}> {userActivityText} </Text>
-        <Text style={styles.heading}>Crash Event</Text>
-        <Text style={styles.valueStyle}> {crashEvent} </Text>
         <Text style={styles.heading}>SDK Status</Text>
         {data.map(item => (
           <Text key={`item-${item.key}`} style={styles.valueStyle}>
