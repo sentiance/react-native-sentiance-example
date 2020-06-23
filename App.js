@@ -69,10 +69,10 @@ export default class App extends Component {
 
   async setupSdk() {
     const sdkNotInitialized = await this.isSdkNotInitialized();
+
     if (sdkNotInitialized) {
       const appId = "{{APP_ID}}";
       const appSecret = "{{APP_SECRET}}";
-
       await RNSentiance.init(appId, appSecret, null, true);
     }
 
@@ -167,6 +167,8 @@ export default class App extends Component {
     const wifiQuota = await RNSentiance.getWiFiQuotaLimit();
     const wifiQuotaUsed = await RNSentiance.getWiFiQuotaUsage();
 
+    const isAndroid = Platform.OS === 'android'
+
     return [
       {
         key: "startStatus",
@@ -182,7 +184,7 @@ export default class App extends Component {
       },
       {
         key: "locationSetting",
-        value: locationSetting ? "YES" : "NO"
+        value: isAndroid ? locationSetting : "NA"
       },
       {
         key: "isAccelPresent",
@@ -194,7 +196,7 @@ export default class App extends Component {
       },
       {
         key: "isGooglePlayServicesMissing",
-        value: isGooglePlayServicesMissing ? "YES" : "NO"
+        value: isAndroid ? (isGooglePlayServicesMissing ? "YES" : "NO") : "NA"
       },
       {
         key: "wifiQuotaStatus",
@@ -211,7 +213,7 @@ export default class App extends Component {
       },
       {
         key: "isActivityRecognitionPermGranted",
-        value: isActivityRecognitionPermGranted ? "YES" : "NO"
+        value: isAndroid ? (isActivityRecognitionPermGranted) ? "YES" : "NO" : "NA"
       },
       {
         key: "isAirplaneModeEnabled",
@@ -219,19 +221,19 @@ export default class App extends Component {
       },
       {
         key: "isLocationAvailable",
-        value: isLocationAvailable ? "YES" : "NO"
+        value: isAndroid ? (isLocationAvailable ? "YES" : "NO") : "NA"
       },
       {
         key: "isBatteryOptimizationEnabled",
-        value: isBatteryOptimizationEnabled ? "YES" : "NO"
+        value: isAndroid ? (isBatteryOptimizationEnabled ? "YES" : "NO") : "NA"
       },
       {
         key: "isBatterySavingEnabled",
-        value: isBatterySavingEnabled ? "YES" : "NO"
+        value: isAndroid ? (isBatterySavingEnabled ? "YES" : "NO") : "NA"
       },
       {
         key: "isBackgroundProcessingRestricted",
-        value: isBackgroundProcessingRestricted ? "YES" : "NO"
+        value: isAndroid ? (isBackgroundProcessingRestricted ? "YES" : "NO") : "NA"
       }
     ];
   }
