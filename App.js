@@ -140,7 +140,7 @@ export default class App extends Component {
     }
   }
 
-  async statusToData(sdkStatus) {
+async statusToData(sdkStatus) {
     const {
       startStatus,
       isRemoteEnabled,
@@ -183,20 +183,12 @@ export default class App extends Component {
         value: isLocationPermGranted ? "YES" : "NO"
       },
       {
-        key: "locationSetting",
-        value: isAndroid ? locationSetting : "NA"
-      },
-      {
         key: "isAccelPresent",
         value: isAccelPresent ? "YES" : "NO"
       },
       {
         key: "isGyroPresent",
         value: isGyroPresent ? "YES" : "NO"
-      },
-      {
-        key: "isGooglePlayServicesMissing",
-        value: isAndroid ? (isGooglePlayServicesMissing ? "YES" : "NO") : "NA"
       },
       {
         key: "wifiQuotaStatus",
@@ -212,12 +204,20 @@ export default class App extends Component {
         value: `${diskQuotaStatus} (${diskQuotaUsed}/${diskQuota} )`
       },
       {
-        key: "isActivityRecognitionPermGranted",
-        value: isAndroid ? (isActivityRecognitionPermGranted) ? "YES" : "NO" : "NA"
-      },
-      {
         key: "isAirplaneModeEnabled",
         value: isAirplaneModeEnabled ? "YES" : "NO"
+      },
+      {
+        key: "locationSetting",
+        value: isAndroid ? locationSetting : "NA"
+      },
+      {
+        key: "isGooglePlayServicesMissing",
+        value: isAndroid ? (isGooglePlayServicesMissing ? "YES" : "NO") : "NA"
+      },
+      {
+        key: "isActivityRecognitionPermGranted",
+        value: isAndroid ? (isActivityRecognitionPermGranted) ? "YES" : "NO" : "NA"
       },
       {
         key: "isLocationAvailable",
