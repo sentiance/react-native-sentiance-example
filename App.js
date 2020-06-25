@@ -41,7 +41,6 @@ export default class App extends Component {
   unSubscribe() {
     this.sdkStatusSubscription.remove();
     this.sdkUserActivityUpdateSubscription.remove();
-    this.sdkCrashEventSubscription.remove();
   }
 
   subscribeAfterSDKSetup() {
@@ -57,12 +56,6 @@ export default class App extends Component {
       }
     );
 
-    this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
-      "SDKCrashEvent",
-      ({ time, lastKnownLocation }) => {
-        this.setState({ crash: { time: new Date(time), lastKnownLocation } });
-      }
-    );
     this.setState({ subscriptionsAdded: true });
   }
 
@@ -81,7 +74,6 @@ export default class App extends Component {
     const data = await this.statusToData(sdkStatus);
     this.setState({ userId, sdkVersion, data });
 
-    await RNSentiance.listenCrashEvents();
     RNSentiance.listenUserActivityUpdates();
   }
 
