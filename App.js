@@ -61,10 +61,10 @@ export default class App extends Component {
 
   async setupSdk() {
     const sdkNotInitialized = await this.isSdkNotInitialized();
+
     if (sdkNotInitialized) {
       const appId = "{{APP_ID}}";
       const appSecret = "{{APP_SECRET}}";
-
       await RNSentiance.init(appId, appSecret, null, true);
     }
 
@@ -131,7 +131,7 @@ export default class App extends Component {
     }
   }
 
-  async statusToData(sdkStatus) {
+async statusToData(sdkStatus) {
     const {
       startStatus,
       isRemoteEnabled,
@@ -142,7 +142,13 @@ export default class App extends Component {
       isGooglePlayServicesMissing,
       wifiQuotaStatus,
       mobileQuotaStatus,
-      diskQuotaStatus
+      diskQuotaStatus,
+      isActivityRecognitionPermGranted,
+      isAirplaneModeEnabled,
+      isLocationAvailable,
+      isBatteryOptimizationEnabled,
+      isBatterySavingEnabled,
+      isBackgroundProcessingRestricted
     } = sdkStatus;
 
     const diskQuota = await RNSentiance.getDiskQuotaLimit();
@@ -151,6 +157,8 @@ export default class App extends Component {
     const mobileQuotaUsed = await RNSentiance.getMobileQuotaUsage();
     const wifiQuota = await RNSentiance.getWiFiQuotaLimit();
     const wifiQuotaUsed = await RNSentiance.getWiFiQuotaUsage();
+
+    const isAndroid = Platform.OS === 'android'
 
     return [
       {
@@ -166,20 +174,12 @@ export default class App extends Component {
         value: isLocationPermGranted ? "YES" : "NO"
       },
       {
-        key: "locationSetting",
-        value: locationSetting ? "YES" : "NO"
-      },
-      {
         key: "isAccelPresent",
         value: isAccelPresent ? "YES" : "NO"
       },
       {
         key: "isGyroPresent",
         value: isGyroPresent ? "YES" : "NO"
-      },
-      {
-        key: "isGooglePlayServicesMissing",
-        value: isGooglePlayServicesMissing ? "YES" : "NO"
       },
       {
         key: "wifiQuotaStatus",
@@ -193,6 +193,38 @@ export default class App extends Component {
       {
         key: "diskQuotaStatus",
         value: `${diskQuotaStatus} (${diskQuotaUsed}/${diskQuota} )`
+      },
+      {
+        key: "isAirplaneModeEnabled",
+        value: isAirplaneModeEnabled ? "YES" : "NO"
+      },
+      {
+        key: "locationSetting",
+        value: isAndroid ? locationSetting : "NA"
+      },
+      {
+        key: "isGooglePlayServicesMissing",
+        value: isAndroid ? (isGooglePlayServicesMissing ? "YES" : "NO") : "NA"
+      },
+      {
+        key: "isActivityRecognitionPermGranted",
+        value: isAndroid ? (isActivityRecognitionPermGranted) ? "YES" : "NO" : "NA"
+      },
+      {
+        key: "isLocationAvailable",
+        value: isAndroid ? (isLocationAvailable ? "YES" : "NO") : "NA"
+      },
+      {
+        key: "isBatteryOptimizationEnabled",
+        value: isAndroid ? (isBatteryOptimizationEnabled ? "YES" : "NO") : "NA"
+      },
+      {
+        key: "isBatterySavingEnabled",
+        value: isAndroid ? (isBatterySavingEnabled ? "YES" : "NO") : "NA"
+      },
+      {
+        key: "isBackgroundProcessingRestricted",
+        value: isAndroid ? (isBackgroundProcessingRestricted ? "YES" : "NO") : "NA"
       }
     ];
   }
