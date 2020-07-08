@@ -60,8 +60,6 @@ export default class App extends Component {
     this.userLinkListener = rnSentianceEmitter.addListener(
       "SDKUserLink",
       id => {
-        /**
-         */
         const { installId } = id;
         this.linkMetaUser(installId);
         this.setState({ userLinkInstallId: installId });
