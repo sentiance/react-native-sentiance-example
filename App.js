@@ -93,13 +93,19 @@ export default class App extends Component {
       await RNSentiance.setValueForKey(userLinkFlag, "true");
     }
 
-    const userId = await RNSentiance.getUserId();
-    const sdkVersion = await RNSentiance.getVersion();
-    const sdkStatus = await RNSentiance.getSdkStatus();
-    const data = await this.statusToData(sdkStatus);
-    this.setState({ userId, sdkVersion, data });
+    this.interval = setInterval(async ()=> {
+      if (this.isSdkInitialized()) {
+        const userId = await RNSentiance.getUserId();
+        const sdkVersion = await RNSentiance.getVersion();
+        const sdkStatus = await RNSentiance.getSdkStatus();
+        const data = await this.statusToData(sdkStatus);
+        this.onUserActivityUpdate(await RNSentiance.getUserActivity());
+        this.setState({ userId, sdkVersion, data });
+        RNSentiance.listenUserActivityUpdates();
 
-    RNSentiance.listenUserActivityUpdates();
+        clearInterval(this.interval)
+      }
+    }, 1000)
   }
 
   async onSdkStatusUpdate(sdkStatus) {
