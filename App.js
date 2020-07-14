@@ -53,7 +53,7 @@ export default class App extends Component {
    * SDK will not be initialized if linking is failed.
    */
   async linkMetaUser(installId) {
-    RNSentiance.userLinkCallback(true);
+    throw new Error('Please implement the user linking logics here then remove this line.');
   }
 
   subscribeSDKEvents() {
