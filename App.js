@@ -13,19 +13,21 @@ import styles from "./styles";
 
 const rnSentianceEmitter = new NativeEventEmitter(RNSentiance);
 
+const userLinkFlag = 'SDK_USER_LINKED';
+
 export default class App extends Component {
   state = {
     userId: "...",
     sdkVersion: "...",
     userActivityText: "...",
+    userLinkInstallId: "...",
     data: [],
-    subscriptionsAdded: false
   };
 
   async componentDidMount() {
     try {
-      await this.setupSdk();
-      this.subscribeAfterSDKSetup();
+      this.subscribeSDKEvents();
+      await this.initSDK();
       await this.requestPermissionAndroid();
     } catch (e) {
       console.error(e.code, e);
@@ -33,48 +35,77 @@ export default class App extends Component {
   }
 
   componentWillUnmount() {
-    if (this.state.subscriptionsAdded) {
-      this.unSubscribe();
-    }
+    this.unSubscribe();
   }
 
   unSubscribe() {
     this.sdkStatusSubscription.remove();
     this.sdkUserActivityUpdateSubscription.remove();
+    this.userLinkListener.remove();
   }
 
-  subscribeAfterSDKSetup() {
+  /**
+   * The user-linking logics are required to be implemented in your backend.
+   * 1. Sending the installId to your backend.
+   * 2. Calling the Sentiance API with the installId and the externalId in your backend.
+   * 3. Responding the result.
+   * If the backend responds successful, call RNSentiance.userLinkCallback(true);. Otherwise, RNSentiance.userLinkCallback(false);
+   * SDK will not be initialized if linking is failed.
+   */
+  async linkUser(installId) {
+    throw new Error('You must implement your own user linking logic inside linkUser(installId)');
+  }
+
+  subscribeSDKEvents() {
+    this.userLinkListener = rnSentianceEmitter.addListener(
+      "SDKUserLink",
+      id => {
+        const { installId } = id;
+        this.linkUser(installId);
+        this.setState({ userLinkInstallId: installId });
+      }
+    );
     this.sdkStatusSubscription = rnSentianceEmitter.addListener(
       "SDKStatusUpdate",
       sdkStatus => this.onSdkStatusUpdate(sdkStatus)
     );
-
     this.sdkUserActivityUpdateSubscription = rnSentianceEmitter.addListener(
       "SDKUserActivityUpdate",
-      userActivity => {
-        this.onUserActivityUpdate(userActivity);
-      }
+      userActivity => this.onUserActivityUpdate(userActivity)
     );
-
-    this.setState({ subscriptionsAdded: true });
   }
 
-  async setupSdk() {
+  async initSDK() {
     const sdkNotInitialized = await this.isSdkNotInitialized();
 
     if (sdkNotInitialized) {
-      const appId = "{{APP_ID}}";
-      const appSecret = "{{APP_SECRET}}";
-      await RNSentiance.init(appId, appSecret, null, true);
+      const appId = "";
+      const appSecret = "";
+
+      console.log("Initializing in JS")
+      await RNSentiance.initWithUserLinkingEnabled(
+        appId,
+        appSecret,
+        null,
+        true
+      );
+
+      await RNSentiance.setValueForKey(userLinkFlag, "true");
     }
 
-    const userId = await RNSentiance.getUserId();
-    const sdkVersion = await RNSentiance.getVersion();
-    const sdkStatus = await RNSentiance.getSdkStatus();
-    const data = await this.statusToData(sdkStatus);
-    this.setState({ userId, sdkVersion, data });
+    this.interval = setInterval(async ()=> {
+      if (this.isSdkInitialized()) {
+        const userId = await RNSentiance.getUserId();
+        const sdkVersion = await RNSentiance.getVersion();
+        const sdkStatus = await RNSentiance.getSdkStatus();
+        const data = await this.statusToData(sdkStatus);
+        this.onUserActivityUpdate(await RNSentiance.getUserActivity());
+        this.setState({ userId, sdkVersion, data });
+        RNSentiance.listenUserActivityUpdates();
 
-    RNSentiance.listenUserActivityUpdates();
+        clearInterval(this.interval)
+      }
+    }, 1000)
   }
 
   async onSdkStatusUpdate(sdkStatus) {
@@ -131,7 +162,7 @@ export default class App extends Component {
     }
   }
 
-async statusToData(sdkStatus) {
+  async statusToData(sdkStatus) {
     const {
       startStatus,
       isRemoteEnabled,
@@ -230,7 +261,13 @@ async statusToData(sdkStatus) {
   }
 
   render() {
-    const { userId, sdkVersion, userActivityText, data } = this.state;
+    const {
+      userId,
+      sdkVersion,
+      userActivityText,
+      data,
+      userLinkInstallId
+    } = this.state;
 
     return (
       <ScrollView style={{backgroundColor: 'black'}} contentContainerStyle={styles.container}>
@@ -243,6 +280,8 @@ async statusToData(sdkStatus) {
         >
           <Text style={styles.copyButton}>Copy User ID</Text>
         </TouchableOpacity>
+        <Text style={styles.heading}>User Linking Install ID</Text>
+        <Text style={styles.valueStyle}>{userLinkInstallId}</Text>
         <Text style={styles.sdkVersion}>SDK version: {sdkVersion}</Text>
         <Text style={styles.heading}>User Activity</Text>
         <Text style={styles.valueStyle}> {userActivityText} </Text>
@@ -255,6 +294,7 @@ async statusToData(sdkStatus) {
         <TouchableOpacity
           onPress={async () => {
             await RNSentiance.reset();
+            await RNSentiance.setValueForKey(userLinkFlag, "");
           }}
           underlayColor="#fff"
         >

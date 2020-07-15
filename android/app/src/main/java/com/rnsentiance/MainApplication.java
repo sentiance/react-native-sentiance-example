@@ -4,8 +4,6 @@ import android.app.Application;
 import android.util.Log;
 
 import com.facebook.react.PackageList;
-import com.facebook.hermes.reactexecutor.HermesExecutorFactory;
-import com.facebook.react.bridge.JavaScriptExecutorFactory;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
@@ -20,7 +18,7 @@ public class MainApplication extends Application implements ReactApplication {
   // Read SENTIANCE_APP_ID and SENTIANCE_APP_SECRET from any safe source
   private static final String SENTIANCE_APP_ID = "";
   private static final String SENTIANCE_SECRET = "";
-  private static final String TAG = "TestApp";
+  private static final String TAG = "RNSentiance example app";
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
     @Override
@@ -54,11 +52,16 @@ public class MainApplication extends Application implements ReactApplication {
     SoLoader.init(this, /* native exopackage */ false);
 
     RNSentianceHelper rnSentianceHelper = RNSentianceHelper.getInstance(getApplicationContext());
-        rnSentianceHelper.initializeSentianceSDK(
-                SENTIANCE_APP_ID,SENTIANCE_SECRET, // app id and secret
-                true, //auto start
-                null, // init callback
-                null // start callback
-        );
+    String value = rnSentianceHelper.getValueForKey("SDK_USER_LINKED", null);
+    if (value != null && value.equals("true")) {
+      Log.i(TAG, "Initializing natively");
+      rnSentianceHelper.initializeSentianceSDK(
+              SENTIANCE_APP_ID,
+              SENTIANCE_SECRET,
+              true, //auto start
+              null, // init callback
+              null // start callback
+      );
+    }
   }
 }
