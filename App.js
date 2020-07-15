@@ -52,8 +52,8 @@ export default class App extends Component {
    * If the backend responds successful, call RNSentiance.userLinkCallback(true);. Otherwise, RNSentiance.userLinkCallback(false);
    * SDK will not be initialized if linking is failed.
    */
-  async linkMetaUser(installId) {
-    throw new Error('Please implement the user linking logics here then remove this line.');
+  async linkUser(installId) {
+    throw new Error('You must implement your own user linking logic inside linkUser(installId)');
   }
 
   subscribeSDKEvents() {
@@ -61,7 +61,7 @@ export default class App extends Component {
       "SDKUserLink",
       id => {
         const { installId } = id;
-        this.linkMetaUser(installId);
+        this.linkUser(installId);
         this.setState({ userLinkInstallId: installId });
       }
     );
