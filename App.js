@@ -15,6 +15,8 @@ const rnSentianceEmitter = new NativeEventEmitter(RNSentiance);
 
 const userLinkFlag = 'SDK_USER_LINKED';
 
+const ACTIVITY_RECOGNITION = 'android.permission.ACTIVITY_RECOGNITION'
+
 export default class App extends Component {
   state = {
     userId: "...",
@@ -147,16 +149,35 @@ export default class App extends Component {
     Clipboard.setString(this.state.userId);
   };
 
+  async getStatus() {
+    const sdkInitialized = await this.isSdkInitialized();
+    if (sdkInitialized) {
+      const sdkStatus = await RNSentiance.getSdkStatus();
+      await this.onSdkStatusUpdate(sdkStatus);
+    }
+  }
+
   async requestPermissionAndroid() {
     if (Platform.OS === "android") {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        const sdkInitialized = await this.isSdkInitialized();
-        if (sdkInitialized) {
-          const sdkStatus = await RNSentiance.getSdkStatus();
-          await this.onSdkStatusUpdate(sdkStatus);
+      const { ACCESS_BACKGROUND_LOCATION, ACCESS_FINE_LOCATION } = PermissionsAndroid.PERMISSIONS
+      const { GRANTED } = PermissionsAndroid.RESULTS
+      if (parseInt(Platform.Version) >= 29 ) {
+        const grantedResults = await PermissionsAndroid.requestMultiple([
+          ACCESS_FINE_LOCATION,
+          ACCESS_BACKGROUND_LOCATION,
+          ACTIVITY_RECOGNITION
+        ])
+        if (
+            grantedResults[ACCESS_FINE_LOCATION] === GRANTED &&
+            grantedResults[ACCESS_BACKGROUND_LOCATION] === GRANTED &&
+            grantedResults[ACTIVITY_RECOGNITION] === GRANTED
+        ) {
+          await this.getStatus()
+        }
+      } else {
+        const granted = await PermissionsAndroid.request(ACCESS_FINE_LOCATION);
+        if (granted === GRANTED) {
+          await this.getStatus()
         }
       }
     }
