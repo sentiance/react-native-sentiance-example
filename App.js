@@ -149,7 +149,7 @@ export default class App extends Component {
     Clipboard.setString(this.state.userId);
   };
 
-  async getStatus() {
+  async refreshSdkStatus() {
     const sdkInitialized = await this.isSdkInitialized();
     if (sdkInitialized) {
       const sdkStatus = await RNSentiance.getSdkStatus();
@@ -172,12 +172,12 @@ export default class App extends Component {
             grantedResults[ACCESS_BACKGROUND_LOCATION] === GRANTED &&
             grantedResults[ACTIVITY_RECOGNITION] === GRANTED
         ) {
-          await this.getStatus()
+          await this.refreshSdkStatus()
         }
       } else {
         const granted = await PermissionsAndroid.request(ACCESS_FINE_LOCATION);
         if (granted === GRANTED) {
-          await this.getStatus()
+          await this.refreshSdkStatus()
         }
       }
     }
