@@ -23,9 +23,9 @@
   // Read SENTIANCE_APP_ID and SENTIANCE_APP_SECRET from any safe source
   NSString *SENTIANCE_APP_ID = @"";
   NSString *SENTIANCE_APP_SECRET = @"";
-  NSString *value = [[bridge moduleForName:@"RNSentiance"] getValueForKey:@"SDK_USER_LINKED" value:nil];
+  BOOL isNativeInitializationEnabled = [[bridge moduleForName:@"RNSentiance"] isNativeInitializationEnabled];
 
-  if (value != nil && [value isEqualToString:@"true"]) {
+  if (isNativeInitializationEnabled) {
     [[bridge moduleForName:@"RNSentiance"] initSDK:SENTIANCE_APP_ID secret:SENTIANCE_APP_SECRET baseURL:nil shouldStart:YES resolver:nil rejecter:nil];
     NSLog(@"Initializing natively");
   }
