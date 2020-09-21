@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "react": "16.8.6",
-    "react-native": "^0.62.2",
+    "react-native": "^0.63.2",
     "react-native-sentiance": "4.0.1"
   },
   "devDependencies": {
