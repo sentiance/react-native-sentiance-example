@@ -52,8 +52,9 @@ public class MainApplication extends Application implements ReactApplication {
     SoLoader.init(this, /* native exopackage */ false);
 
     RNSentianceHelper rnSentianceHelper = RNSentianceHelper.getInstance(getApplicationContext());
-    String value = rnSentianceHelper.getValueForKey("SDK_USER_LINKED", null);
-    if (value != null && value.equals("true")) {
+    Boolean isNativeInitializationEnabled = rnSentianceHelper.isNativeInitializationEnabled();
+
+    if (isNativeInitializationEnabled) {
       Log.i(TAG, "Initializing natively");
       rnSentianceHelper.initializeSentianceSDK(
               SENTIANCE_APP_ID,

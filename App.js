@@ -13,8 +13,6 @@ import styles from "./styles";
 
 const rnSentianceEmitter = new NativeEventEmitter(RNSentiance);
 
-const userLinkFlag = 'SDK_USER_LINKED';
-
 const ACTIVITY_RECOGNITION = 'android.permission.ACTIVITY_RECOGNITION'
 
 export default class App extends Component {
@@ -92,7 +90,7 @@ export default class App extends Component {
         true
       );
 
-      await RNSentiance.setValueForKey(userLinkFlag, "true");
+      await RNSentiance.enableNativeInitialization();
     }
 
     this.interval = setInterval(async ()=> {
@@ -315,7 +313,6 @@ export default class App extends Component {
         <TouchableOpacity
           onPress={async () => {
             await RNSentiance.reset();
-            await RNSentiance.setValueForKey(userLinkFlag, "");
           }}
           underlayColor="#fff"
         >
