@@ -1,5 +1,5 @@
-import RNSentiance from "react-native-sentiance";
-import React, { Component } from "react";
+import RNSentiance from 'react-native-sentiance';
+import React, { Component } from 'react';
 import {
   Platform,
   Text,
@@ -7,20 +7,20 @@ import {
   TouchableOpacity,
   Clipboard,
   NativeEventEmitter,
-  PermissionsAndroid
-} from "react-native";
-import styles from "./styles";
+  PermissionsAndroid,
+} from 'react-native';
+import styles from './styles';
 
 const rnSentianceEmitter = new NativeEventEmitter(RNSentiance);
 
-const ACTIVITY_RECOGNITION = 'android.permission.ACTIVITY_RECOGNITION'
+const ACTIVITY_RECOGNITION = 'android.permission.ACTIVITY_RECOGNITION';
 
 export default class App extends Component {
   state = {
-    userId: "...",
-    sdkVersion: "...",
-    userActivityText: "...",
-    userLinkInstallId: "...",
+    userId: '...',
+    sdkVersion: '...',
+    userActivityText: '...',
+    userLinkInstallId: '...',
     data: [],
   };
 
@@ -53,24 +53,26 @@ export default class App extends Component {
    * SDK will not be initialized if linking is failed.
    */
   async linkUser(installId) {
-    throw new Error('You must implement your own user linking logic inside linkUser(installId)');
+    throw new Error(
+      'You must implement your own user linking logic inside linkUser(installId)'
+    );
   }
 
   subscribeSDKEvents() {
     this.userLinkListener = rnSentianceEmitter.addListener(
-      "SDKUserLink",
-      id => {
+      'SDKUserLink',
+      async id => {
         const { installId } = id;
-        this.linkUser(installId);
         this.setState({ userLinkInstallId: installId });
+        await this.linkUser(installId);
       }
     );
     this.sdkStatusSubscription = rnSentianceEmitter.addListener(
-      "SDKStatusUpdate",
+      'SDKStatusUpdate',
       sdkStatus => this.onSdkStatusUpdate(sdkStatus)
     );
     this.sdkUserActivityUpdateSubscription = rnSentianceEmitter.addListener(
-      "SDKUserActivityUpdate",
+      'SDKUserActivityUpdate',
       userActivity => this.onUserActivityUpdate(userActivity)
     );
   }
@@ -79,10 +81,10 @@ export default class App extends Component {
     const sdkNotInitialized = await this.isSdkNotInitialized();
 
     if (sdkNotInitialized) {
-      const appId = "";
-      const appSecret = "";
+      const appId = '';
+      const appSecret = '';
 
-      console.log("Initializing in JS")
+      console.log('Initializing in JS');
       await RNSentiance.initWithUserLinkingEnabled(
         appId,
         appSecret,
@@ -93,19 +95,19 @@ export default class App extends Component {
       await RNSentiance.enableNativeInitialization();
     }
 
-    this.interval = setInterval(async ()=> {
-      if (this.isSdkInitialized()) {
+    this.interval = setInterval(async () => {
+      if (await this.isSdkInitialized()) {
         const userId = await RNSentiance.getUserId();
         const sdkVersion = await RNSentiance.getVersion();
         const sdkStatus = await RNSentiance.getSdkStatus();
         const data = await this.statusToData(sdkStatus);
         this.onUserActivityUpdate(await RNSentiance.getUserActivity());
         this.setState({ userId, sdkVersion, data });
-        RNSentiance.listenUserActivityUpdates();
+        await RNSentiance.listenUserActivityUpdates();
 
-        clearInterval(this.interval)
+        clearInterval(this.interval);
       }
-    }, 1000)
+    }, 1000);
   }
 
   async onSdkStatusUpdate(sdkStatus) {
@@ -115,32 +117,32 @@ export default class App extends Component {
 
   onUserActivityUpdate(userActivity) {
     const { type, stationaryInfo } = userActivity;
-    let userActivityText = "";
-    let stationaryLocation = "";
+    let userActivityText = '';
+    let stationaryLocation = '';
 
-    if (type === "USER_ACTIVITY_TYPE_STATIONARY") {
+    if (type === 'USER_ACTIVITY_TYPE_STATIONARY') {
       const { location } = stationaryInfo;
       if (location) {
         const { latitude, longitude } = location;
         stationaryLocation = `${parseFloat(latitude)},${parseFloat(longitude)}`;
       }
       userActivityText = `Stationary @${stationaryLocation}`;
-    } else if (type === "USER_ACTIVITY_TYPE_TRIP") {
-      userActivityText = "Trip";
-    } else if (type === "USER_ACTIVITY_TYPE_UNKNOWN") {
-      userActivityText = "Unknown";
+    } else if (type === 'USER_ACTIVITY_TYPE_TRIP') {
+      userActivityText = 'Trip';
+    } else if (type === 'USER_ACTIVITY_TYPE_UNKNOWN') {
+      userActivityText = 'Unknown';
     }
     this.setState({ userActivityText });
   }
 
   async isSdkInitialized() {
     const initState = await RNSentiance.getInitState();
-    return initState === "INITIALIZED";
+    return initState === 'INITIALIZED';
   }
 
   async isSdkNotInitialized() {
     const initState = await RNSentiance.getInitState();
-    return initState === "NOT_INITIALIZED";
+    return initState === 'NOT_INITIALIZED';
   }
 
   copyUserIdToBuffer = () => {
@@ -156,26 +158,29 @@ export default class App extends Component {
   }
 
   async requestPermissionAndroid() {
-    if (Platform.OS === "android") {
-      const { ACCESS_BACKGROUND_LOCATION, ACCESS_FINE_LOCATION } = PermissionsAndroid.PERMISSIONS
-      const { GRANTED } = PermissionsAndroid.RESULTS
-      if (parseInt(Platform.Version) >= 29 ) {
+    if (Platform.OS === 'android') {
+      const {
+        ACCESS_BACKGROUND_LOCATION,
+        ACCESS_FINE_LOCATION,
+      } = PermissionsAndroid.PERMISSIONS;
+      const { GRANTED } = PermissionsAndroid.RESULTS;
+      if (parseInt(Platform.Version, 10) >= 29) {
         const grantedResults = await PermissionsAndroid.requestMultiple([
           ACCESS_FINE_LOCATION,
           ACCESS_BACKGROUND_LOCATION,
-          ACTIVITY_RECOGNITION
-        ])
+          ACTIVITY_RECOGNITION,
+        ]);
         if (
-            grantedResults[ACCESS_FINE_LOCATION] === GRANTED &&
-            grantedResults[ACCESS_BACKGROUND_LOCATION] === GRANTED &&
-            grantedResults[ACTIVITY_RECOGNITION] === GRANTED
+          grantedResults[ACCESS_FINE_LOCATION] === GRANTED &&
+          grantedResults[ACCESS_BACKGROUND_LOCATION] === GRANTED &&
+          grantedResults[ACTIVITY_RECOGNITION] === GRANTED
         ) {
-          await this.refreshSdkStatus()
+          await this.refreshSdkStatus();
         }
       } else {
         const granted = await PermissionsAndroid.request(ACCESS_FINE_LOCATION);
         if (granted === GRANTED) {
-          await this.refreshSdkStatus()
+          await this.refreshSdkStatus();
         }
       }
     }
@@ -198,7 +203,7 @@ export default class App extends Component {
       isLocationAvailable,
       isBatteryOptimizationEnabled,
       isBatterySavingEnabled,
-      isBackgroundProcessingRestricted
+      isBackgroundProcessingRestricted,
     } = sdkStatus;
 
     const diskQuota = await RNSentiance.getDiskQuotaLimit();
@@ -208,74 +213,82 @@ export default class App extends Component {
     const wifiQuota = await RNSentiance.getWiFiQuotaLimit();
     const wifiQuotaUsed = await RNSentiance.getWiFiQuotaUsage();
 
-    const isAndroid = Platform.OS === 'android'
+    const isAndroid = Platform.OS === 'android';
 
     return [
       {
-        key: "startStatus",
-        value: startStatus
+        key: 'startStatus',
+        value: startStatus,
       },
       {
-        key: "isRemoteEnabled",
-        value: isRemoteEnabled ? "YES" : "NO"
+        key: 'isRemoteEnabled',
+        value: isRemoteEnabled ? 'YES' : 'NO',
       },
       {
-        key: "isLocationPermGranted",
-        value: isLocationPermGranted ? "YES" : "NO"
+        key: 'isLocationPermGranted',
+        value: isLocationPermGranted ? 'YES' : 'NO',
       },
       {
-        key: "isAccelPresent",
-        value: isAccelPresent ? "YES" : "NO"
+        key: 'isAccelPresent',
+        value: isAccelPresent ? 'YES' : 'NO',
       },
       {
-        key: "isGyroPresent",
-        value: isGyroPresent ? "YES" : "NO"
+        key: 'isGyroPresent',
+        value: isGyroPresent ? 'YES' : 'NO',
       },
       {
-        key: "wifiQuotaStatus",
-        value: `${wifiQuotaStatus} (${wifiQuotaUsed}/${wifiQuota} )`
+        key: 'wifiQuotaStatus',
+        value: `${wifiQuotaStatus} (${wifiQuotaUsed}/${wifiQuota} )`,
       },
       {
-        key: "mobileQuotaStatus",
+        key: 'mobileQuotaStatus',
 
-        value: `${mobileQuotaStatus} (${mobileQuotaUsed}/${mobileQuota} )`
+        value: `${mobileQuotaStatus} (${mobileQuotaUsed}/${mobileQuota} )`,
       },
       {
-        key: "diskQuotaStatus",
-        value: `${diskQuotaStatus} (${diskQuotaUsed}/${diskQuota} )`
+        key: 'diskQuotaStatus',
+        value: `${diskQuotaStatus} (${diskQuotaUsed}/${diskQuota} )`,
       },
       {
-        key: "isAirplaneModeEnabled",
-        value: isAirplaneModeEnabled ? "YES" : "NO"
+        key: 'isAirplaneModeEnabled',
+        value: isAirplaneModeEnabled ? 'YES' : 'NO',
       },
       {
-        key: "locationSetting",
-        value: isAndroid ? locationSetting : "NA"
+        key: 'locationSetting',
+        value: isAndroid ? locationSetting : 'NA',
       },
       {
-        key: "isGooglePlayServicesMissing",
-        value: isAndroid ? (isGooglePlayServicesMissing ? "YES" : "NO") : "NA"
+        key: 'isGooglePlayServicesMissing',
+        value: isAndroid ? (isGooglePlayServicesMissing ? 'YES' : 'NO') : 'NA',
       },
       {
-        key: "isActivityRecognitionPermGranted",
-        value: isAndroid ? (isActivityRecognitionPermGranted) ? "YES" : "NO" : "NA"
+        key: 'isActivityRecognitionPermGranted',
+        value: isAndroid
+          ? isActivityRecognitionPermGranted
+            ? 'YES'
+            : 'NO'
+          : 'NA',
       },
       {
-        key: "isLocationAvailable",
-        value: isAndroid ? (isLocationAvailable ? "YES" : "NO") : "NA"
+        key: 'isLocationAvailable',
+        value: isAndroid ? (isLocationAvailable ? 'YES' : 'NO') : 'NA',
       },
       {
-        key: "isBatteryOptimizationEnabled",
-        value: isAndroid ? (isBatteryOptimizationEnabled ? "YES" : "NO") : "NA"
+        key: 'isBatteryOptimizationEnabled',
+        value: isAndroid ? (isBatteryOptimizationEnabled ? 'YES' : 'NO') : 'NA',
       },
       {
-        key: "isBatterySavingEnabled",
-        value: isAndroid ? (isBatterySavingEnabled ? "YES" : "NO") : "NA"
+        key: 'isBatterySavingEnabled',
+        value: isAndroid ? (isBatterySavingEnabled ? 'YES' : 'NO') : 'NA',
       },
       {
-        key: "isBackgroundProcessingRestricted",
-        value: isAndroid ? (isBackgroundProcessingRestricted ? "YES" : "NO") : "NA"
-      }
+        key: 'isBackgroundProcessingRestricted',
+        value: isAndroid
+          ? isBackgroundProcessingRestricted
+            ? 'YES'
+            : 'NO'
+          : 'NA',
+      },
     ];
   }
 
@@ -285,11 +298,11 @@ export default class App extends Component {
       sdkVersion,
       userActivityText,
       data,
-      userLinkInstallId
+      userLinkInstallId,
     } = this.state;
 
     return (
-      <ScrollView style={{backgroundColor: 'black'}} contentContainerStyle={styles.container}>
+      <ScrollView style={styles.root} contentContainerStyle={styles.container}>
         <Text style={styles.welcome}>RNSentiance</Text>
         <Text style={styles.heading}>User ID</Text>
         <Text style={styles.valueStyle}>{userId}</Text>
