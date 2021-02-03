@@ -21,6 +21,7 @@ export default class App extends Component {
     sdkVersion: '...',
     userActivityText: '...',
     userLinkInstallId: '...',
+    crashEvent: '...',
     data: [],
   };
 
@@ -42,6 +43,9 @@ export default class App extends Component {
     this.sdkStatusSubscription.remove();
     this.sdkUserActivityUpdateSubscription.remove();
     this.userLinkListener.remove();
+    if (this.sdkCrashEventSubscription) {
+      this.sdkCrashEventSubscription.remove();
+    }
   }
 
   /**
@@ -104,6 +108,26 @@ export default class App extends Component {
         this.onUserActivityUpdate(await RNSentiance.getUserActivity());
         this.setState({ userId, sdkVersion, data });
         await RNSentiance.listenUserActivityUpdates();
+
+        if (
+          await RNSentiance.isVehicleCrashDetectionSupported(
+            'TRIP_TYPE_EXTERNAL'
+          )
+        ) {
+          this.sdkCrashEventSubscription = rnSentianceEmitter.addListener(
+            'VehicleCrashEvent',
+            ({ time, ...evt }) => {
+              this.setState({
+                crashEvent: JSON.stringify(
+                  { time: new Date(time), ...evt },
+                  null,
+                  3
+                ),
+              });
+            }
+          );
+          await RNSentiance.listenVehicleCrashEvents();
+        }
 
         clearInterval(this.interval);
       }
@@ -299,6 +323,7 @@ export default class App extends Component {
       userActivityText,
       data,
       userLinkInstallId,
+      crashEvent,
     } = this.state;
 
     return (
@@ -317,6 +342,16 @@ export default class App extends Component {
         <Text style={styles.sdkVersion}>SDK version: {sdkVersion}</Text>
         <Text style={styles.heading}>User Activity</Text>
         <Text style={styles.valueStyle}> {userActivityText} </Text>
+        <Text style={styles.heading}>Crash Event</Text>
+        <TouchableOpacity
+          onPress={async () => {
+            await RNSentiance.invokeDummyVehicleCrash();
+          }}
+          underlayColor="#fff"
+        >
+          <Text style={styles.copyButton}>Invoke Dummy Vehicle Crash</Text>
+        </TouchableOpacity>
+        <Text style={styles.valueStyle}> {crashEvent} </Text>
         <Text style={styles.heading}>SDK Status</Text>
         {data.map(item => (
           <Text key={`item-${item.key}`} style={styles.valueStyle}>
