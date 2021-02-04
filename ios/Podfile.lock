@@ -247,7 +247,8 @@ PODS:
     - React-jsi (= 0.63.2)
   - RNSentiance (4.0.2):
     - React
-  - SENTSDK (5.7.4)
+    - SENTSDK (= 5.9.0)
+  - SENTSDK (5.9.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -279,12 +280,12 @@ DEPENDENCIES:
   - React-RCTVibration (from `../node_modules/react-native/Libraries/Vibration`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RNSentiance (from `../node_modules/react-native-sentiance/ios/RNSentiance.podspec`)
-  - SENTSDK (from `../node_modules/react-native-sentiance/ios/SENTSDK.podspec`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - boost-for-react-native
+    - SENTSDK
 
 EXTERNAL SOURCES:
   DoubleConversion:
@@ -339,8 +340,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNSentiance:
     :path: "../node_modules/react-native-sentiance/ios/RNSentiance.podspec"
-  SENTSDK:
-    :podspec: "../node_modules/react-native-sentiance/ios/SENTSDK.podspec"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -371,10 +370,10 @@ SPEC CHECKSUMS:
   React-RCTText: 1b6773e776e4b33f90468c20fe3b16ca3e224bb8
   React-RCTVibration: 4d2e726957f4087449739b595f107c0d4b6c2d2d
   ReactCommon: a0a1edbebcac5e91338371b72ffc66aa822792ce
-  RNSentiance: 04538abc8dc35b74d5ab77396bded66fcb43a532
-  SENTSDK: 15a6758e4d007ff155dc5f4d9e271cc172b13541
+  RNSentiance: 1b027f233e486cc94bb78a32afc92c6c24d348dd
+  SENTSDK: 412993972ce25bb099b47900c2ae2d0e8b32c0f7
   Yoga: 7740b94929bbacbddda59bf115b5317e9a161598
 
-PODFILE CHECKSUM: 3f6396d36c4e2bb03782a8a4092190a49f21d0f4
+PODFILE CHECKSUM: 0d7b140632b4717fac2493410314d1a09fa2e45d
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.1
