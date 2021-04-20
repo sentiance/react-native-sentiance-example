@@ -245,10 +245,10 @@ PODS:
     - React-Core (= 0.63.2)
     - React-cxxreact (= 0.63.2)
     - React-jsi (= 0.63.2)
-  - RNSentiance (4.0.2):
+  - RNSentiance (4.4.1):
     - React
-    - SENTSDK (= 5.9.0)
-  - SENTSDK (5.9.0)
+    - SENTSDK (= 5.10.0)
+  - SENTSDK (5.10.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -370,8 +370,8 @@ SPEC CHECKSUMS:
   React-RCTText: 1b6773e776e4b33f90468c20fe3b16ca3e224bb8
   React-RCTVibration: 4d2e726957f4087449739b595f107c0d4b6c2d2d
   ReactCommon: a0a1edbebcac5e91338371b72ffc66aa822792ce
-  RNSentiance: 1b027f233e486cc94bb78a32afc92c6c24d348dd
-  SENTSDK: 412993972ce25bb099b47900c2ae2d0e8b32c0f7
+  RNSentiance: 408469e77e38091847fb2f5959239af7ad6badda
+  SENTSDK: cda8badbaac5355d81607f910f25f1e8e4f3a54a
   Yoga: 7740b94929bbacbddda59bf115b5317e9a161598
 
 PODFILE CHECKSUM: 0d7b140632b4717fac2493410314d1a09fa2e45d

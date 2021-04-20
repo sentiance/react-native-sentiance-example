@@ -21,6 +21,7 @@ export default class App extends Component {
     sdkVersion: '...',
     userActivityText: '...',
     userLinkInstallId: '...',
+    thirdPartyLinked: '...',
     data: [],
   };
 
@@ -94,6 +95,10 @@ export default class App extends Component {
 
       await RNSentiance.enableNativeInitialization();
     }
+
+    this.setState({
+      thirdPartyLinked: (await RNSentiance.isThirdPartyLinked()) ? 'Yes' : 'No',
+    });
 
     this.interval = setInterval(async () => {
       if (await this.isSdkInitialized()) {
@@ -299,6 +304,7 @@ export default class App extends Component {
       userActivityText,
       data,
       userLinkInstallId,
+      thirdPartyLinked,
     } = this.state;
 
     return (
@@ -323,6 +329,9 @@ export default class App extends Component {
             {item.key}: {item.value}
           </Text>
         ))}
+        <Text style={styles.valueStyle}>
+          Third party linked: {thirdPartyLinked}
+        </Text>
         <TouchableOpacity
           onPress={async () => {
             await RNSentiance.reset();
