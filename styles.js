@@ -44,4 +44,9 @@ export default StyleSheet.create({
     color: 'gray',
     textAlign: 'center',
   },
+  separator: {
+    marginTop: 16,
+    backgroundColor: '#fff',
+    height: 1
+  }
 });

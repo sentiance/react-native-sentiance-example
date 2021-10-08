@@ -10,14 +10,13 @@ import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 
 import com.sentiance.react.bridge.RNSentianceHelper;
+import com.sentiance.react.bridge.InitOptions;
+import com.rnsentiance.MyPackage;
 
 import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
 
-  // Read SENTIANCE_APP_ID and SENTIANCE_APP_SECRET from any safe source
-  private static final String SENTIANCE_APP_ID = "";
-  private static final String SENTIANCE_SECRET = "";
   private static final String TAG = "RNSentiance example app";
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
@@ -32,6 +31,7 @@ public class MainApplication extends Application implements ReactApplication {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       // Packages that cannot be autolinked yet can be added manually here, for example:
       // packages.add(new MyReactNativePackage());
+      packages.add(new MyPackage());
       return packages;
     }
 
@@ -57,11 +57,9 @@ public class MainApplication extends Application implements ReactApplication {
     if (isNativeInitializationEnabled) {
       Log.i(TAG, "Initializing natively");
       rnSentianceHelper.initializeSentianceSDK(
-              SENTIANCE_APP_ID,
-              SENTIANCE_SECRET,
-              true, //auto start
-              null, // init callback
-              null // start callback
+        new InitOptions.Builder(BuildConfig.APP_ID, BuildConfig.APP_SECRET)
+            .autoStart(true)
+            .build()
       );
     }
   }
