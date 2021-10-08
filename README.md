@@ -26,12 +26,19 @@ $ gem install bundler
 $ bundle install
 ```
 
-### Instal iOS dependencies
+### Install iOS dependencies
 ```sh
 $ cd ios && pod install
 ```
 
+## Setup
+
+* Set your Sentiance credentials (app ID and secret) inside `.env`.
+* If you want to make use of the SDK's user-linking feature, update both native (iOS and Android) and javascript initalization
+  methods to enable user-linking (see `MyApplication.java`, `AppDelegate.m` and `App.js`). You will also need to implement the
+  steps decribed in the `linkUser` function inside `App.js`.
+
 ## Run
 
-### Open `./ios/RNSentiance.xcworkspace` in XCode
-### Open `./android` folder in Android Studio
+* Open `./ios/RNSentiance.xcworkspace` in XCode
+* Open `./android` folder in Android Studio

@@ -10,14 +10,12 @@ import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
 
 import com.sentiance.react.bridge.RNSentianceHelper;
+import com.sentiance.react.bridge.InitOptions;
 
 import java.util.List;
 
 public class MainApplication extends Application implements ReactApplication {
 
-  // Read SENTIANCE_APP_ID and SENTIANCE_APP_SECRET from any safe source
-  private static final String SENTIANCE_APP_ID = "";
-  private static final String SENTIANCE_SECRET = "";
   private static final String TAG = "RNSentiance example app";
 
   private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
@@ -55,13 +53,18 @@ public class MainApplication extends Application implements ReactApplication {
     Boolean isNativeInitializationEnabled = rnSentianceHelper.isNativeInitializationEnabled();
 
     if (isNativeInitializationEnabled) {
+      // SDK initialization creates a Sentiance user on the device. If your app makes use of the SDK's user-linking
+      // feature, you will want to initialize the SDK in the javascript code first (e.g. after your user logs in),
+      // so that you are able to do user linking there.
+      // In this case, to prevent accidentally initializing the SDK here first, instead of calling `initializeSentianceSDK`,
+      // call `initializeSentianceSDKIfUserLinkingCompleted`. This method will initialize the SDK only if a Sentiance
+      // user exists, and has already been linked.
+
       Log.i(TAG, "Initializing natively");
       rnSentianceHelper.initializeSentianceSDK(
-              SENTIANCE_APP_ID,
-              SENTIANCE_SECRET,
-              true, //auto start
-              null, // init callback
-              null // start callback
+        new InitOptions.Builder(BuildConfig.APP_ID, BuildConfig.APP_SECRET)
+            .autoStart(true)
+            .build()
       );
     }
   }

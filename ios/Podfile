@@ -1,10 +1,10 @@
-platform :ios, '10.0'
+platform :ios, '12.0'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
 target 'RNSentiance' do
 
   pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
-  pod 'FBReactNativeSpec', :path => "../node_modules/react-native/Libraries/FBReactNativeSpec"
+  pod 'FBReactNativeSpec', :path => "../node_modules/react-native/React/FBReactNativeSpec"
   pod 'RCTRequired', :path => "../node_modules/react-native/Libraries/RCTRequired"
   pod 'RCTTypeSafety', :path => "../node_modules/react-native/Libraries/TypeSafety"
   pod 'React', :path => '../node_modules/react-native/'
@@ -21,7 +21,8 @@ target 'RNSentiance' do
   pod 'React-RCTText', :path => '../node_modules/react-native/Libraries/Text'
   pod 'React-RCTVibration', :path => '../node_modules/react-native/Libraries/Vibration'
   pod 'React-Core/RCTWebSocket', :path => '../node_modules/react-native/'
-
+  pod 'React-runtimeexecutor', :path => '../node_modules/react-native/ReactCommon/runtimeexecutor/React-runtimeexecutor.podspec'
+  pod 'React-perflogger', :path => '../node_modules/react-native/ReactCommon/reactperflogger/React-perflogger.podspec'
   pod 'React-cxxreact', :path => '../node_modules/react-native/ReactCommon/cxxreact'
   pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi'
   pod 'React-jsiexecutor', :path => '../node_modules/react-native/ReactCommon/jsiexecutor'
@@ -32,7 +33,7 @@ target 'RNSentiance' do
 
   pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
-  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+  pod 'RCT-Folly', :podspec => '../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec'
 
   pod 'RNSentiance', :path => '../node_modules/react-native-sentiance/ios/RNSentiance.podspec'
 
@@ -43,14 +44,3 @@ target 'RNSentiance' do
 
   use_native_modules!
 end
-
-target 'RNSentiance-tvOS' do
-  # Pods for RNSentiance-tvOS
-
-  target 'RNSentiance-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
-
-end
-

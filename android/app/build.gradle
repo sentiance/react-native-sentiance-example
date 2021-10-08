@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"
 
 import com.android.build.OutputFile
 
@@ -181,6 +182,7 @@ android {
         pickFirst '**/x86_64/libc++_shared.so'
         pickFirst '**/x86/libjsc.so'
         pickFirst '**/armeabi-v7a/libjsc.so'
+        exclude 'META-INF/*'
     }
 }
 
