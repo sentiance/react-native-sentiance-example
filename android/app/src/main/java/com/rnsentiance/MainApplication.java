@@ -54,13 +54,8 @@ public class MainApplication extends Application implements ReactApplication {
     RNSentianceHelper rnSentianceHelper = RNSentianceHelper.getInstance(getApplicationContext());
     Boolean isNativeInitializationEnabled = rnSentianceHelper.isNativeInitializationEnabled();
 
-    if (isNativeInitializationEnabled) {
+
       Log.i(TAG, "Initializing natively");
-      rnSentianceHelper.initializeSentianceSDK(
-        new InitOptions.Builder(BuildConfig.APP_ID, BuildConfig.APP_SECRET)
-            .autoStart(true)
-            .build()
-      );
-    }
+      rnSentianceHelper.initializeSDK("https://preprod-api.sentiance.com");
   }
 }

@@ -48,6 +48,7 @@ const App = () => {
         this.sdkStatusSubscription.remove();
         this.userContextUpdateSubscription.remove();
         this.sdkUserActivityUpdateSubscription.remove();
+        this.sdkStartFinishedSubscription.remove();
         //this.userLinkListener.remove();
     }
 
@@ -72,6 +73,10 @@ const App = () => {
               await linkUser(installId);
             }
         );*/
+        this.sdkStartFinishedSubscription = rnSentianceEmitter.addListener(
+            'OnStartFinished',
+            sdkStatus => onStartFinished(sdkStatus)
+        );
         this.sdkStatusSubscription = rnSentianceEmitter.addListener(
             'SDKStatusUpdate',
             sdkStatus => onSdkStatusUpdate(sdkStatus)
@@ -90,25 +95,14 @@ const App = () => {
     }
 
     const initSDK = async () => {
-        const sdkNotInitialized = await isSdkNotInitialized();
-
-        if (sdkNotInitialized) {
-            console.log('Initializing in JS');
-            await RNSentiance.init(
-                APP_ID,
-                APP_SECRET,
-                "https://preprod-api.sentiance.com",
-                true
-            );
-
-            await RNSentiance.enableNativeInitialization();
-        } else {
-            console.log("SDK is initialised");
-        }
+        //await RNSentiance.enableNativeInitialization();
+        console.log("initializing");
+        const result = await RNSentiance.createUnlinkedUser(APP_ID, APP_SECRET);
+        console.log(result);
 
         const userContext = await RNSentiance.getUserContext()
         notifyUserDataChanged({context: userContext});
-        notifySdkStatusUpdated({isThirdPartyLinked: await RNSentiance.isThirdPartyLinked() ? 'Yes' : 'No'})
+        //notifySdkStatusUpdated({isThirdPartyLinked: await RNSentiance.isThirdPartyLinked() ? 'Yes' : 'No'})
 
         this.interval = setInterval(async () => {
             if (await isSdkInitialized()) {
@@ -126,6 +120,10 @@ const App = () => {
             }
         }, 1000);
     }
+
+    const onStartFinished = async (sdkStatus) => {
+
+    };
 
     const onSdkStatusUpdate = async (sdkStatus) => {
         const data = await statusToData(sdkStatus);
