@@ -25,9 +25,9 @@ const App = () => {
     useEffect(() => {
         async function init() {
             try {
-                subscribeSDKEvents();
+                subscribeToSDKEvents();
+                await requestAndroidPermissions();
                 await initSDK();
-                await requestPermissionAndroid();
             } catch (e) {
                 console.error(e.code, e);
             }
@@ -49,7 +49,7 @@ const App = () => {
         this.userContextUpdateSubscription.remove();
         this.sdkUserActivityUpdateSubscription.remove();
         this.sdkStartFinishedSubscription.remove();
-        //this.userLinkListener.remove();
+        this.userLinkListener.remove();
     }
 
     /**
@@ -61,18 +61,17 @@ const App = () => {
      * SDK will not be initialized if linking is failed.
      */
     const linkUser = async (installId) => {
-
     }
 
-    const subscribeSDKEvents = () => {
-        /*this.userLinkListener = rnSentianceEmitter.addListener(
+    const subscribeToSDKEvents = () => {
+        this.userLinkListener = rnSentianceEmitter.addListener(
             'SDKUserLink',
-            async id => {
-              const {installId} = id;
+            async event => {
+              const {installId} = event;
               notifyUserDataChanged({linkingInstallId: installId});
               await linkUser(installId);
             }
-        );*/
+        );
         this.sdkStartFinishedSubscription = rnSentianceEmitter.addListener(
             'OnStartFinished',
             sdkStatus => onStartFinished(sdkStatus)
@@ -95,14 +94,17 @@ const App = () => {
     }
 
     const initSDK = async () => {
-        //await RNSentiance.enableNativeInitialization();
-        console.log("initializing");
-        const result = await RNSentiance.createUnlinkedUser(APP_ID, APP_SECRET);
-        console.log(result);
+        const userExists = await RNSentiance.userExists();
+        if (!userExists) {
+            const linkedUser = await RNSentiance.createLinkedUser(APP_ID, APP_SECRET);
+            console.log(`Created new linked user: ${JSON.stringify(linkedUser)}`);
+            const startResult = await RNSentiance.start();
+            console.log(`SDK is now in ${startResult.startStatus} state.`);
+        }
 
         const userContext = await RNSentiance.getUserContext()
         notifyUserDataChanged({context: userContext});
-        //notifySdkStatusUpdated({isThirdPartyLinked: await RNSentiance.isThirdPartyLinked() ? 'Yes' : 'No'})
+        notifySdkStatusUpdated({isThirdPartyLinked: await RNSentiance.isUserLinked() ? 'Yes' : 'No'})
 
         this.interval = setInterval(async () => {
             if (await isSdkInitialized()) {
@@ -153,11 +155,6 @@ const App = () => {
         return initState === 'INITIALIZED';
     }
 
-    const isSdkNotInitialized = async () => {
-        const initState = await RNSentiance.getInitState();
-        return initState === 'NOT_INITIALIZED';
-    }
-
     const refreshSdkStatus = async () => {
         const sdkInitialized = await isSdkInitialized();
         if (sdkInitialized) {
@@ -166,7 +163,7 @@ const App = () => {
         }
     }
 
-    const requestPermissionAndroid = async () => {
+    const requestAndroidPermissions = async () => {
         if (Platform.OS === 'android') {
             const {
                 ACCESS_BACKGROUND_LOCATION,
