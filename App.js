@@ -98,8 +98,8 @@ const App = () => {
         if (!userExists) {
             const linkedUser = await RNSentiance.createLinkedUser(APP_ID, APP_SECRET);
             console.log(`Created new linked user: ${JSON.stringify(linkedUser)}`);
-            const startResult = await RNSentiance.start();
-            console.log(`SDK is now in ${startResult.startStatus} state.`);
+            const startResult = await RNSentiance.enableDetections();
+            console.log(`SDK is now in ${startResult.detectionStatus} state.`);
         }
 
         const userContext = await RNSentiance.getUserContext()
