@@ -1,4 +1,4 @@
-import RNSentiance from 'react-native-sentiance';
+import RNSentiance from '@react-native-sentiance/sentiance';
 import React, {useEffect} from 'react';
 import {NativeEventEmitter, PermissionsAndroid, Platform,} from 'react-native';
 import {Provider, useDispatch} from 'react-redux';
@@ -7,6 +7,7 @@ import RootNavigator from './navigation/RootNavigator';
 import {updateSdkStatus, updateUserData} from "./redux/actions";
 import {statusToData} from "./converters/SdkStatusConverter";
 import Config from "react-native-config";
+import axios from "axios";
 
 const APP_ID = Config.APP_ID;
 const APP_SECRET = Config.APP_SECRET;
@@ -27,7 +28,7 @@ const App = () => {
             try {
                 subscribeToSDKEvents();
                 await requestAndroidPermissions();
-                await initSDK();
+                await bootstrapSDK();
             } catch (e) {
                 console.error(e.code, e);
             }
@@ -48,8 +49,7 @@ const App = () => {
         this.sdkStatusSubscription.remove();
         this.userContextUpdateSubscription.remove();
         this.sdkUserActivityUpdateSubscription.remove();
-        this.sdkStartFinishedSubscription.remove();
-        this.userLinkListener.remove();
+        this.sdkDetectionsEnabledSubscription.remove();
     }
 
     /**
@@ -61,20 +61,13 @@ const App = () => {
      * SDK will not be initialized if linking is failed.
      */
     const linkUser = async (installId) => {
+
     }
 
     const subscribeToSDKEvents = () => {
-        this.userLinkListener = rnSentianceEmitter.addListener(
-            'SDKUserLink',
-            async event => {
-              const {installId} = event;
-              notifyUserDataChanged({linkingInstallId: installId});
-              await linkUser(installId);
-            }
-        );
-        this.sdkStartFinishedSubscription = rnSentianceEmitter.addListener(
-            'OnStartFinished',
-            sdkStatus => onStartFinished(sdkStatus)
+        this.sdkDetectionsEnabledSubscription = rnSentianceEmitter.addListener(
+            'OnDetectionsEnabled',
+            sdkStatus => onDetectionsEnabled(sdkStatus)
         );
         this.sdkStatusSubscription = rnSentianceEmitter.addListener(
             'SDKStatusUpdate',
@@ -93,11 +86,18 @@ const App = () => {
         );
     }
 
-    const initSDK = async () => {
+    const bootstrapSDK = async () => {
         const userExists = await RNSentiance.userExists();
         if (!userExists) {
-            const linkedUser = await RNSentiance.createLinkedUser(APP_ID, APP_SECRET);
-            console.log(`Created new linked user: ${JSON.stringify(linkedUser)}`);
+            try {
+                const linkedUser = await RNSentiance.createLinkedUser(APP_ID, APP_SECRET, linkUser);
+                console.log(`Created new linked user: ${JSON.stringify(linkedUser)}`);
+                const startResult = await RNSentiance.enableDetections();
+                console.log(`SDK is now in ${startResult.detectionStatus} state.`);
+            } catch (e) {
+                console.log(`Error: ${e}`);
+            }
+        } else {
             const startResult = await RNSentiance.enableDetections();
             console.log(`SDK is now in ${startResult.detectionStatus} state.`);
         }
@@ -123,8 +123,8 @@ const App = () => {
         }, 1000);
     }
 
-    const onStartFinished = async (sdkStatus) => {
-
+    const onDetectionsEnabled = async (sdkStatus) => {
+        console.log("Detections are now enabled.");
     };
 
     const onSdkStatusUpdate = async (sdkStatus) => {
