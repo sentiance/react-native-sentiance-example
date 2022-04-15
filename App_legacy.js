@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {NativeEventEmitter, PermissionsAndroid, Platform,} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {NativeEventEmitter, PermissionsAndroid, Platform} from 'react-native';
 import {Provider, useDispatch} from 'react-redux';
 import {store} from './redux/store';
 import RootNavigator from './navigation/RootNavigator';
@@ -7,8 +7,7 @@ import {updateSdkStatus, updateUserData} from "./redux/actions";
 import {statusToData} from "./converters/SdkStatusConverter";
 import Config from "react-native-config";
 import axios from "axios";
-import * as RNSentiance from "@react-native-sentiance/core";
-import * as RNSentianceContext from "@react-native-sentiance/user-context";
+import RNSentiance from "@react-native-sentiance/legacy";
 
 const APP_ID = Config.APP_ID;
 const APP_SECRET = Config.APP_SECRET;
@@ -24,6 +23,12 @@ const AppWrapper = () => {
 }
 
 const App = () => {
+    const [userLinkingSub, setUserLinkingSub] = useState(undefined);
+    const [sdkStatusSub, setSdkStatusSub] = useState(undefined);
+    const [userContextUpdateSub, setUserContextUpdateSub] = useState(undefined);
+    const [sdkUserActivityUpdateSub, setSdkUserActivityUpdateSub] = useState(undefined);
+    const [sdkDetectionsEnabledSub, setSdkDetectionsEnabledSub] = useState(undefined);
+
     useEffect(() => {
         async function init() {
             try {
@@ -47,10 +52,11 @@ const App = () => {
     }, []);
 
     const unSubscribe = () => {
-        this.sdkStatusSubscription.remove();
-        this.userContextUpdateSubscription.remove();
-        this.sdkUserActivityUpdateSubscription.remove();
-        this.sdkDetectionsEnabledSubscription.remove();
+        userLinkingSub.remove();
+        sdkStatusSub.remove();
+        userContextUpdateSub.remove();
+        sdkUserActivityUpdateSub.remove();
+        sdkDetectionsEnabledSub.remove();
     }
 
     /**
@@ -62,64 +68,101 @@ const App = () => {
      * SDK will not be initialized if linking is failed.
      */
     const linkUser = async (installId) => {
-        return false;
+        try {
+            const response = await axios.post(`https://preprod-api.sentiance.com/v2/users/${installId}/link`,
+                {"external_id": "87979"},
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer f729832f-e229-412c-a9dd-ac2b45e0c431.ef5ee3a8751bf39037891eb0832b0f57b16b4460a19f7d7f16aa6d849ad6d7d1e679d40133962d942944bc0ad380612e1f4a6f8a49d27f02ca79304d571dd352"
+                    }
+                });
+            RNSentiance.userLinkCallback(true);
+            console.log('linking success');
+            return true;
+        } catch (e) {
+            RNSentiance.userLinkCallback(false);
+            console.log('linking failed');
+            return false;
+        }
     }
 
     const subscribeToSDKEvents = () => {
-        this.sdkDetectionsEnabledSubscription = rnSentianceEmitter.addListener(
+        setUserLinkingSub(rnSentianceEmitter.addListener(
+            'SDKUserLink',
+            async id => {
+                console.log("SDKUserLink event received");
+                const {installId} = id;
+                await linkUser(installId);
+            }
+        ));
+        setSdkDetectionsEnabledSub(rnSentianceEmitter.addListener(
             'OnDetectionsEnabled',
-            sdkStatus => onDetectionsEnabled(sdkStatus)
-        );
-        RNSentiance.addSdkStatusUpdateListener(onSdkStatusUpdate);
-        RNSentianceContext.addSdkStatusUpdateListener(onSdkStatusUpdate);
-        this.sdkUserActivityUpdateSubscription = rnSentianceEmitter.addListener(
+            async sdkStatus => {
+                console.log("OnDetectionsEnabled event received");
+                await onDetectionsEnabled(sdkStatus);
+            }
+        ));
+        setSdkStatusSub(rnSentianceEmitter.addListener(
+            'SDKStatusUpdate',
+            async sdkStatus => {
+                console.log("SDKStatusUpdate event received");
+                await onSdkStatusUpdate(sdkStatus);
+            }
+        ));
+        setSdkUserActivityUpdateSub(rnSentianceEmitter.addListener(
             'SDKUserActivityUpdate',
-            userActivity => onUserActivityUpdate(userActivity)
-        );
-        this.userContextUpdateSubscription = rnSentianceEmitter.addListener(
+            async userActivity => {
+                console.log("SDKUserActivityUpdate event received");
+                await onUserActivityUpdate(userActivity);
+            }
+        ));
+        setUserContextUpdateSub(rnSentianceEmitter.addListener(
             'UserContextUpdateEvent',
             event => {
                 const {criteria, userContext} = event;
                 onUserContextUpdate(userContext);
             }
-        );
+        ));
     }
 
     const bootstrapSDK = async () => {
-        const userExists = await RNSentiance.userExists();
+        const sdkNotInitialized = !(await isSdkInitialized());
 
-        if (!userExists) {
-            try {
-                const linkedUser = await RNSentiance.createUser({
-                    appId: APP_ID,
-                    appSecret: APP_SECRET,
-                    platformUrl: 'https://preprod-api.sentiance.com',
-                    linker: linkUser
-                });
-                const startResult = await RNSentiance.enableDetections();
-                console.log(`SDK is now in ${startResult.detectionStatus} state.`);
-            } catch (e) {
-                console.log(`Error: ${e}`);
-            }
+        if (sdkNotInitialized) {
+            console.log('Initializing in JS');
+            await RNSentiance.initWithUserLinkingEnabled(
+                APP_ID,
+                APP_SECRET,
+                'https://preprod-api.sentiance.com',
+                true
+            );
+
+            await RNSentiance.enableNativeInitialization();
+            console.log(await RNSentiance.isThirdPartyLinked());
         }
 
         //const userContext = await RNSentiance.getUserContext()
         //notifyUserDataChanged({context: userContext});
-        notifySdkStatusUpdated({isThirdPartyLinked: await RNSentiance.isUserLinked() ? 'Yes' : 'No'})
+        notifySdkStatusUpdated({isThirdPartyLinked: await RNSentiance.isThirdPartyLinked() ? 'Yes' : 'No'})
 
-        this.interval = setInterval(async () => {
-            if (await isSdkInitialized()) {
-                onUserActivityUpdate(await RNSentiance.getUserActivity());
+        const interval = setInterval(async () => {
+            try {
+                if (await isSdkInitialized()) {
+                    onUserActivityUpdate(await RNSentiance.getUserActivity());
 
-                const userId = await RNSentiance.getUserId();
-                const sdkVersion = await RNSentiance.getVersion();
-                notifyUserDataChanged({id: userId})
-                notifySdkStatusUpdated({version: sdkVersion})
+                    const userId = await RNSentiance.getUserId();
+                    const sdkVersion = await RNSentiance.getVersion();
+                    notifyUserDataChanged({id: userId})
+                    notifySdkStatusUpdated({version: sdkVersion})
 
-                await RNSentiance.listenUserActivityUpdates();
-                //await RNSentiance.listenUserContextUpdates();
+                    await RNSentiance.listenUserActivityUpdates();
+                    //await RNSentiance.listenUserContextUpdates();
 
-                clearInterval(this.interval);
+                    clearInterval(interval);
+                }
+            } catch (e) {
+                console.error(e);
             }
         }, 1000);
     }
@@ -129,7 +172,6 @@ const App = () => {
     };
 
     const onSdkStatusUpdate = async (sdkStatus) => {
-        console.log('AHAAAA');
         const data = await statusToData(sdkStatus);
         notifySdkStatusUpdated({data});
     };

@@ -1,4 +1,5 @@
-import RNSentiance from 'react-native-sentiance';
+
+import * as RNSentiance from "@react-native-sentiance/core";
 import {Clipboard, ScrollView, Text, TouchableOpacity} from "react-native";
 import React, {useEffect, useState} from 'react';
 import styles from "../styles";

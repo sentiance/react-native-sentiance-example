@@ -8,11 +8,11 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.sentiance.react.bridge.core.SentianceHelper;
+import com.sentiance.react.bridge.legacy.RNSentianceHelper;
 
 import java.util.List;
 
-public class MainApplication extends Application implements ReactApplication {
+public class MainApplicationLegacy extends Application implements ReactApplication {
 
 		private static final String TAG = "RNSentiance example app";
 
@@ -48,7 +48,21 @@ public class MainApplication extends Application implements ReactApplication {
 				super.onCreate();
 				SoLoader.init(this, /* native exopackage */ false);
 
-				SentianceHelper rnSentianceHelper = SentianceHelper.getInstance(getApplicationContext());
-				rnSentianceHelper.initializeSDK();
+				/*SentianceHelper rnSentianceHelper = SentianceHelper.getInstance(getApplicationContext());
+				rnSentianceHelper.initializeSDK();*/
+
+				RNSentianceHelper rnSentianceHelper = RNSentianceHelper.getInstance(getApplicationContext());
+				Boolean isNativeInitializationEnabled = rnSentianceHelper.isNativeInitializationEnabled();
+
+				if (isNativeInitializationEnabled) {
+						Log.i(TAG, "Initializing natively");
+						rnSentianceHelper.initializeSentianceSDKWithUserLinking(
+										BuildConfig.APP_ID,
+										BuildConfig.APP_SECRET,
+										true, //auto start
+										null, // init callback
+										null // start callback
+						);
+				}
 		}
 }

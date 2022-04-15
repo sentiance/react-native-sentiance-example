@@ -8,6 +8,10 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@react-native-sentiance/core": "^1.1.4",
+    "@react-native-sentiance/crash-detection": "^1.1.4",
+    "@react-native-sentiance/user-context": "^1.1.4",
+    "@react-native-sentiance/legacy": "^1.1.4",
     "@react-navigation/native": "^6.0.2",
     "@react-navigation/native-stack": "^6.1.0",
     "axios": "^0.26.0",

@@ -62,7 +62,19 @@ const App = () => {
      * SDK will not be initialized if linking is failed.
      */
     const linkUser = async (installId) => {
-        return false;
+        try {
+            const response = await axios.post(`https://preprod-api.sentiance.com/v2/users/${installId}/link`,
+                {"external_id": "84523"},
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer f729832f-e229-412c-a9dd-ac2b45e0c431.ef5ee3a8751bf39037891eb0832b0f57b16b4460a19f7d7f16aa6d849ad6d7d1e679d40133962d942944bc0ad380612e1f4a6f8a49d27f02ca79304d571dd352"
+                    }
+                });
+            return true;
+        } catch (e) {
+            return false;
+        }
     }
 
     const subscribeToSDKEvents = () => {

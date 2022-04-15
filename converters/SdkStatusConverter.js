@@ -1,5 +1,5 @@
 import {Platform} from "react-native";
-import RNSentiance from 'react-native-sentiance';
+import * as RNSentiance from "@react-native-sentiance/core";
 
 export async function statusToData(sdkStatus) {
     const {
