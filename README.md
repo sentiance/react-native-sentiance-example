@@ -1,5 +1,7 @@
-# RNSentiance Example
+# DEPRECATED
+Refer to [sample-apps-react-native](https://github.com/sentiance/sample-apps-react-native).
 
+#
 This is an example project using our [react-native-sentiance](https://github.com/sentiance/react-native-sentiance) bridge for react-native (>0.60).
 
 Below are the examples of other features in separated branches:	
